@@ -21,7 +21,7 @@ public class ViewsSakilaAndParameters
         public int Length { get; set; }
         public string Rating { get; set; }
 
-        public List<string> Actors { get; set; }
+        public string Actors { get; set; }
     }
     
     public List<FilmListSlower> GetFilmListSlower()
@@ -29,18 +29,10 @@ public class ViewsSakilaAndParameters
         using var connection = new MySqlConnection(GetConnectionString());
         var sql = """
                     SELECT fid as FilmId, title as Title, description as Description, category as Category, price as Price, 
-                           length as Length, rating as Rating, actors as actorsList
+                           length as Length, rating as Rating, actors as Actors
                     FROM nicer_but_slower_film_list
                   """;
-        var films = connection.Query<FilmListSlower, string, FilmListSlower>(sql, map: (film, actorsList) =>
-        {
-            if (actorsList != null)
-            {
-                film.Actors = actorsList.Split(",").ToList();
-            }
-                
-            return film;
-        }, splitOn: "actorsList");
+        var films = connection.Query<FilmListSlower>(sql);
         return films.ToList();
     }
     
@@ -62,11 +54,11 @@ public class ViewsSakilaAndParameters
         using var connection = new MySqlConnection(GetConnectionString());
         var sql = """
                     SELECT fid as FilmId, title as Title, description as Description, category as Category, price as Price, 
-                           length as Length, rating as Rating, actors as actorsList
+                           length as Length, rating as Rating, actors as Actors
                     FROM nicer_but_slower_film_list
-                    WHERE category = @category
+                    WHERE category = @Category
                   """;
-        var films = connection.Query<FilmListSlower>(sql, param: new {category = category});
+        var films = connection.Query<FilmListSlower>(sql, param: new {Category = category});
         return films.ToList();
     }
     
@@ -88,12 +80,12 @@ public class ViewsSakilaAndParameters
         using var connection = new MySqlConnection(GetConnectionString());
         var sql = """
                     SELECT fid as FilmId, title as Title, description as Description, category as Category, price as Price, 
-                           length as Length, rating as Rating, actors as actorsList
+                           length as Length, rating as Rating, actors as Actors
                     FROM nicer_but_slower_film_list
-                    WHERE category = @category 
-                        AND rating = @rating
+                    WHERE category = @Category 
+                        AND rating = @Rating
                   """;
-        var films = connection.Query<FilmListSlower>(sql, param: new {category = category, rating = rating});
+        var films = connection.Query<FilmListSlower>(sql, param: new {Category = category, Rating = rating});
         return films.ToList();
     }
     
@@ -116,14 +108,14 @@ public class ViewsSakilaAndParameters
         using var connection = new MySqlConnection(GetConnectionString());
         var sql = """
                     SELECT fid as FilmId, title as Title, description as Description, category as Category, price as Price, 
-                           length as Length, rating as Rating
+                           length as Length, rating as Rating, actors as Actors
                     FROM nicer_but_slower_film_list
                     WHERE 
-                        (@category IS NULL OR category = @category) -- trick with IS NULL and OR to make the parameter optional! Make sure to use parentheses! 
+                        (@Category IS NULL OR category = @Category) -- trick with IS NULL and OR to make the parameter optional! Make sure to use parentheses! 
                         AND 
-                        (@rating IS NULL OR rating = @rating) 
+                        (@Rating IS NULL OR rating = @Rating) 
                   """;
-        var films = connection.Query<FilmListSlower>(sql, param: new {category = category, rating = rating});
+        var films = connection.Query<FilmListSlower>(sql, param: new {Category = category, Rating = rating});
         return films.ToList();
     }
     
@@ -161,7 +153,7 @@ public class ViewsSakilaAndParameters
     {
         var sql = @"
                     SELECT fid as FilmId, title as Title, description as Description, category as Category, price as Price, 
-                           length as Length, rating as Rating, actors as actorsList
+                           length as Length, rating as Rating, actors as Actors
                     FROM nicer_but_slower_film_list
                     ORDER BY @SortColumn @SortDirection
                     LIMIT @PageSize
@@ -174,7 +166,8 @@ public class ViewsSakilaAndParameters
                     Offset = (page - 1) * pageSize, 
                     PageSize = pageSize, 
                     SortColumn = sortColumn, 
-                    SortDirection = sortDirection}
+                    SortDirection = sortDirection
+                }
             );
         return films.ToList();
     }
@@ -219,7 +212,7 @@ public class ViewsSakilaAndParameters
 
         var sql = @"
                     SELECT fid as FilmId, title as Title, description as Description, category as Category, price as Price, 
-                           length as Length, rating as Rating, actors as actorsList
+                           length as Length, rating as Rating, actors as Actors
                     FROM nicer_but_slower_film_list
                     ORDER BY @SortColumn @SortDirection
                     LIMIT @PageSize
