@@ -1,0 +1,15 @@
+﻿{
+  Title: Aliens,
+  Year: 1986,
+  Duration: 137,
+  Language: English,
+  ReleaseDate: DateTime_1,
+  ReleaseCountryCode: UK,
+  Directors: [
+    {
+      DirectorId: 215,
+      FirstName: James,
+      LastName: Cameron
+    }
+  ]
+}

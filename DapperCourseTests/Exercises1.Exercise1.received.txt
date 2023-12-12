@@ -1,0 +1,42 @@
+﻿[
+  {
+    Title: Seven Samurai,
+    Year: 1954
+  },
+  {
+    Title: Vertigo,
+    Year: 1958
+  },
+  {
+    Title: The Innocents,
+    Year: 1961
+  },
+  {
+    Title: Lawrence of Arabia,
+    Year: 1962
+  },
+  {
+    Title: Deliverance,
+    Year: 1972
+  },
+  {
+    Title: Chinatown,
+    Year: 1974
+  },
+  {
+    Title: Annie Hall,
+    Year: 1977
+  },
+  {
+    Title: The Deer Hunter,
+    Year: 1978
+  },
+  {
+    Title: Blade Runner,
+    Year: 1982
+  },
+  {
+    Title: Amadeus,
+    Year: 1984
+  }
+]

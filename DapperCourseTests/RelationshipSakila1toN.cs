@@ -1,6 +1,10 @@
+using Argon;
 using Dapper;
+using DapperCourse;
 using FluentAssertions;
 using MySql.Data.MySqlClient;
+using System.Text.Json;
+using JsonSerializer = System.Text.Json.JsonSerializer;
 
 namespace DapperCourseTests;
 
@@ -195,6 +199,59 @@ public class RelationshipSakila1toN
         countriesByDictionary.Should().BeEquivalentTo(countriesByGrouping);
         countriesByDictionary.Should().BeEquivalentTo(countriesByQueryMultiple);
     }
+
     
+    // public class Country
+    // {
+    //     public int CountryId { get; set; }
+    //     public string Name { get; set; } = null!;
+    //     public DateTime LastUpdate { get; set; }
+    //     
+    //     public List<City> Cities { get; set; } = null!;
+    // }
+    //
+    // public class City
+    // {
+    //     public int CityId { get; set; }
+    //     public string Name { get; set; } = null!;
+    //     public int CountryId { get; set; }
+    //     // public Country Country { get; set; } = null!;
+    //     public DateTime LastUpdate { get; set; }
+    // }
     
+    public List<Country?> GetCountryIncludeCitiesAsJsonTrick()
+    {
+        string sql =
+            """
+            SELECT JSON_OBJECT( 'CountryId', c1.country_id,
+                                'Name', c1.country,
+                               'Cities', JSON_ARRAYAGG(
+                                        JSON_OBJECT('Name', c2.city,
+                                                    'CityId', c2.city_id,
+                                                    'CountryId', c2.country_id
+                                        )))
+            FROM country c1 JOIN city c2 ON c1.country_id = c2.country_id
+            GROUP BY c1.country_id, c1.country
+            ORDER BY c1.country_id
+            """;
+        using var connection = new MySqlConnection(GetConnectionStringForShop());
+        var jsonRows = connection.Query<string>(sql);
+        var countries = jsonRows.Select(x => JsonSerializer.Deserialize<Country>(x))
+            .ToList();
+
+        return countries;
+    }
+    
+    [Test]
+    public void GetCountryIncludeCitiesAsJsonTrickTest()
+    {
+        // Arrange
+        var sut = new RelationshipSakila1toN();
+        
+        // Act
+        var countries = sut.GetCountryIncludeCitiesAsJsonTrick();
+        
+        // Assert
+        countries.Should().HaveCount(109);
+    }
 }
