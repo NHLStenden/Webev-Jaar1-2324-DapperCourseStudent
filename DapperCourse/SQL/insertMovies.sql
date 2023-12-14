@@ -1,4 +1,4 @@
-
+USE Movies;
 INSERT INTO Actors (ActorId, FirstName, LastName, Gender) VALUES (101, N'James', N'Stewart', N'M');
 INSERT INTO Actors (ActorId, FirstName, LastName, Gender) VALUES (102, N'Deborah', N'Kerr', N'F');
 INSERT INTO Actors (ActorId, FirstName, LastName, Gender) VALUES (103, N'Peter', N'OToole', N'M');
@@ -119,7 +119,7 @@ INSERT INTO Reviewers (ReviewerId, Name) VALUES (9001, N'Righty Sock');
 INSERT INTO Reviewers (ReviewerId, Name) VALUES (9002, N'Jack Malvern');
 INSERT INTO Reviewers (ReviewerId, Name) VALUES (9003, N'Flagrant Baronessa');
 INSERT INTO Reviewers (ReviewerId, Name) VALUES (9004, N'Alec Shaw');
-INSERT INTO Reviewers (ReviewerId, Name) VALUES (9005, NULL;
+INSERT INTO Reviewers (ReviewerId, Name) VALUES (9005, NULL);
 INSERT INTO Reviewers (ReviewerId, Name) VALUES (9006, N'Victor Woeltjen');
 INSERT INTO Reviewers (ReviewerId, Name) VALUES (9007, N'Simon Wright');
 INSERT INTO Reviewers (ReviewerId, Name) VALUES (9008, N'Neal Wruck');

@@ -5,7 +5,7 @@ namespace DapperCourse;
 
 public class SimpleQueries
 {
-    // Create the database movies database and tables using the createMovies.sql in the SQL folder.
+    // Create the movies database and tables using the createMovies.sql in the SQL folder.
     // Load the data into the database, by executing the insertMovies.sql script in the SQL folder.
     // This is aa exercises to make sure that you can connect to the database.
     // You can use the NuGet Package Manager or the Package Manager Console to install MySql.Data. (Database provider for mysql, sometimes called connector or driver)

@@ -1,4 +1,6 @@
-create database if not exists movies;
+drop database if exists Movies;
+create database if not exists Movies;
+use Movies;
 
 create table Actors
 (
