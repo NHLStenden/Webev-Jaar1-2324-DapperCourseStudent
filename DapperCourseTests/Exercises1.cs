@@ -49,7 +49,7 @@ public class Exercises1
     [Test]
     public void Exercise0Test()
     {
-        // Arrange
+        // Arrange®
         var sut = new Exercises1();
         
         // Act
