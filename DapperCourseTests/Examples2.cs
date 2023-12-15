@@ -4,7 +4,7 @@ using MySql.Data.MySqlClient;
 
 namespace DapperCourseTests;
 
-public class ViewsSakilaAndParameters
+public class Examples2
 {
     private static string GetConnectionString()
     {
@@ -47,16 +47,20 @@ public class ViewsSakilaAndParameters
     public void SqlInjectionExampleTest()
     {
         // Arrange
-        var sut = new ViewsSakilaAndParameters();
+        var sut = new Examples2();
         
         // Act
         var allCategoriesMovies = sut.SqlInjectionExample("Action' OR 1 = 1 -- ");
         
         // Assert
-        Assert.Pass();
+        allCategoriesMovies.Should().HaveCount(1000);
     }
     
-
+    
+    // In this example a view is used instead of a table, the view is called nicer_but_slower_film_list
+    // You can take a look at the view in MySQL Workbench or in the IDE (Rider or Visual Studio)
+    // The view nicer_but_slower_film_list is a join of the tables film, film_category and category, film_actor and actor
+    // Left joins are used, so all films are returned, even if there are no actors or categories for a film!
     public class FilmListSlower
     {
         public int FilmId { get; set; }
@@ -86,7 +90,7 @@ public class ViewsSakilaAndParameters
     public void GetFilmListSlowerTest()
     {
         // Arrange
-        var sut = new ViewsSakilaAndParameters();
+        var sut = new Examples2();
         
         // Act
         var films = sut.GetFilmListSlower();
@@ -95,6 +99,12 @@ public class ViewsSakilaAndParameters
         Assert.That(films, Is.Not.Null);
     }
     
+    // In this example we use a parameter (category) to filter the films by category
+    // The parameter is added to the SQL query with @Category
+    // The parameter is added to the connection.Query method with param: new {Category = category}
+    // This is a good practice to avoid SQL injection!
+    // @Category in the SQL query is officially called a named parameter (because it has a name) or Query Parameter Placeholder.
+    // https://www.learndapper.com/parameters/
     public List<FilmListSlower> GetFilmListSlowerWithCategoryParameter(string category)
     {
         using var connection = new MySqlConnection(GetConnectionString());
@@ -112,13 +122,213 @@ public class ViewsSakilaAndParameters
     public void GetFilmListSlowerWithCategoryParameterTest()
     {
         // Arrange
-        var sut = new ViewsSakilaAndParameters();
+        var sut = new Examples2();
         
         // Act
         var actionFilms = sut.GetFilmListSlowerWithCategoryParameter("Action");
         
         // Assert
         Assert.That(actionFilms, Is.Not.Null);
+    }
+    
+    //Let's use parameters for Insertion, Updating and Deletion
+    //To facilitate this, we create a new table called mywatchlist
+    //Before we can use the table watchlist, we have to create it!
+    //DROP TABLE IF EXISTS watchlist;
+    //CREATE TABLE watchlist (
+    //    id INT NOT NULL AUTO_INCREMENT,
+    //    title VARCHAR(255) NOT NULL,
+    //    PRIMARY KEY (id)
+    //);
+    //Use the Dapper method Execute() to create the database table, execute returns the number of affected rows
+    //If the table is created successfully, the number of affected rows is 0 
+    // (because the table is empty and no rows are affected).
+    public int CreateDatabaseTableWatchlistAndWatchListCategory()
+    {
+        using var connection = new MySqlConnection(GetConnectionString());
+        var sql = @"
+                    DROP TABLE IF EXISTS watchlist;
+                    CREATE TABLE watchlist (
+                        id INT NOT NULL AUTO_INCREMENT,
+                        title VARCHAR(255) NOT NULL,
+                        watchlist_category_id INT NOT NULL REFERENCES watchlist_category(id),
+                        PRIMARY KEY (id)
+                    );
+
+                    DROP TABLE IF EXISTS watchlist_category;
+                    CREATE TABLE watchlist_category (
+                        id INT NOT NULL AUTO_INCREMENT,
+                        title VARCHAR(255) NOT NULL,
+                        PRIMARY KEY (id)
+                    );
+                  ";
+        int numberOfEffectedRows = connection.Execute(sql);
+        return numberOfEffectedRows;
+    }
+    
+    [Test]
+    public void CreateDatabaseTableWatchlistTest()
+    {
+        // Arrange
+        var sut = new Examples2();
+        
+        // Act
+        var numberOfEffectedRows = sut.CreateDatabaseTableWatchlistAndWatchListCategory();
+        
+        // Assert
+        numberOfEffectedRows.Should().Be(0);
+        
+        using var connection = new MySqlConnection(GetConnectionString());
+        int checkTableExists1 = connection.ExecuteScalar<int>("SELECT COUNT(*) FROM watchlist");
+        checkTableExists1.Should().Be(0);
+        int checkTableExists2 = connection.ExecuteScalar<int>("SELECT COUNT(*) FROM watchlist_category");
+        checkTableExists2.Should().Be(0);
+
+    }
+    
+    // Now that the tables watchlist and watchlist_category are created, we can insert rows into the tables
+    // We use the Dapper method Execute() to insert a row into the table
+    // We can parameterize the SQL query with @Title (SQL parameter placeholder)
+    // Often it's necessary to return the id of the inserted row, it's a good idea to return the id when we insert a row.
+    // Every database has a different way to return the id of the inserted row.
+    // In MySQL we can use the function LAST_INSERT_ID() to return the id of the inserted row.
+    // We can use the Dapper method ExecuteScalar<T>() to return the id of the inserted row.
+    // So we need to insert a row into the table watchlist_category, then return the id of the inserted row.
+    // Then we can insert a row into the table watchlist and use the id of the inserted row from the table watchlist_category.
+    //
+    // A query looks like this, actually we have two queries, but we can execute them in one go with the ExecuteScalar<T>() method.
+    // INSERT INTO table (column0, column1, ...) VALUES (@column0, @column1, ...);
+    // SELECT LAST_INSERT_ID();
+    //
+    // This method returns the id of the inserted row in the table watchlist.
+    public int InsertIntoWatchList(string categoryTitle, string movieTitle)
+    {
+        var insertWatchlistCategory = @"
+                    INSERT INTO watchlist_category (title) VALUES (@Title);
+                    SELECT LAST_INSERT_ID();
+                  ";
+        
+        var insertIntoWatchlist = @"
+                    INSERT INTO watchlist (title, watchlist_category_id) VALUES (@Title, @WatchlistCategoryId);
+                    SELECT LAST_INSERT_ID();
+                  ";
+        
+        using var connection = new MySqlConnection(GetConnectionString());
+        int watchlistCategoryId = connection.
+            ExecuteScalar<int>(insertWatchlistCategory, param: new {Title = categoryTitle});
+        
+        int idOfInsertedRow = 
+            connection.ExecuteScalar<int>(insertIntoWatchlist, 
+                param: new {Title = movieTitle, WatchlistCategoryId = watchlistCategoryId});
+        return idOfInsertedRow;
+    }
+    
+    [Test]
+    public void InsertIntoWatchListTest()
+    {
+        // Arrange
+        var sut = new Examples2();
+        CreateDatabaseTableWatchlistAndWatchListCategory();
+        
+        // Act
+        var idOfInsertedRow = sut.InsertIntoWatchList("Action List", "The Matrix");
+        
+        // Assert
+        idOfInsertedRow.Should().Be(1);
+        
+        using var connection = new MySqlConnection(GetConnectionString());
+        string sql =
+            """
+                SELECT w.title as MovieTitle, wc.title as CategoryTitle
+                FROM watchlist w
+                    JOIN watchlist_category wc ON w.watchlist_category_id = wc.id
+            """;
+        
+        // I'm not a big fan of tuples, but it's a good way to return multiple values from a query without creating a new class
+        var movies = connection.Query<(string, string)>(sql).ToList();
+        movies.First().Item1.Should().Be("The Matrix");
+        movies.First().Item2.Should().Be("Action List");
+    }
+    
+    // When we update a row it's a good idea to use the primary key (id) to identify the row.
+    // When we update a row it's a good idea to return the number of affected rows (this should be 1).
+    public int UpdateWatchListCategoryTitle(int watchlistCategoryId, string newTitle)
+    {
+        var updateWatchlistCategory = @"
+                    UPDATE watchlist_category SET title = @NewTitle WHERE id = @WatchlistCategoryId;
+                  ";
+        
+        using var connection = new MySqlConnection(GetConnectionString());
+        int numberOfEffectedRows = connection.Execute(updateWatchlistCategory, param: 
+            new {WatchlistCategoryId = watchlistCategoryId, NewTitle = newTitle});
+
+        return numberOfEffectedRows;
+    }
+    
+    [Test]
+    public void UpdateWatchListCategoryTitleTest()
+    {
+        // Arrange
+        var sut = new Examples2();
+        CreateDatabaseTableWatchlistAndWatchListCategory();
+        
+        // Act
+        var idOfInsertedRow = sut.InsertIntoWatchList("Action List", "The Matrix");
+        var numberOfEffectedRows = sut.UpdateWatchListCategoryTitle(idOfInsertedRow, "Action List 2");
+        
+        // Assert
+        numberOfEffectedRows.Should().Be(1);
+        
+        using var connection = new MySqlConnection(GetConnectionString());
+        string sql =
+            """
+                SELECT w.title as MovieTitle, wc.title as CategoryTitle
+                FROM watchlist w
+                    JOIN watchlist_category wc ON w.watchlist_category_id = wc.id
+            """;
+        
+        // I'm not a big fan of tuples, but it's a good way to return multiple values from a query without creating a new class
+        var movies = connection.Query<(string, string)>(sql).ToList();
+        movies.First().Item1.Should().Be("The Matrix");
+        movies.First().Item2.Should().Be("Action List 2");
+    }
+    
+    // When we delete a row it's a good idea to use the primary key (id) to identify the row.
+    // !!!!Make sure you always have a where clause in your delete and update statement!!!!
+    // Do you understand why?
+    public void DeleteWatchListCategory(int watchlistCategoryId)
+    {
+        var deleteWatchlistCategory = @"
+                    DELETE FROM watchlist_category WHERE id = @WatchlistCategoryId;
+                  ";
+        
+        using var connection = new MySqlConnection(GetConnectionString());
+        connection.Execute(deleteWatchlistCategory, param: new {WatchlistCategoryId = watchlistCategoryId});
+    }
+    
+    [Test]
+    public void DeleteWatchListCategoryTest()
+    {
+        // Arrange
+        var sut = new Examples2();
+        CreateDatabaseTableWatchlistAndWatchListCategory();
+        
+        // Act
+        var idOfInsertedRow = sut.InsertIntoWatchList("Action List", "The Matrix");
+        sut.DeleteWatchListCategory(idOfInsertedRow);
+        
+        // Assert
+        using var connection = new MySqlConnection(GetConnectionString());
+        string sql =
+            """
+                SELECT w.title as MovieTitle, wc.title as CategoryTitle
+                FROM watchlist w
+                    JOIN watchlist_category wc ON w.watchlist_category_id = wc.id
+            """;
+        
+        // I'm not a big fan of tuples, but it's a good way to return multiple values from a query without creating a new class
+        var movies = connection.Query<(string, string)>(sql).ToList();
+        movies.Should().BeEmpty();
     }
     
     public List<FilmListSlower> GetFilmListSlowerWithCategoryParameterAndRating(string category, string rating)
@@ -139,7 +349,7 @@ public class ViewsSakilaAndParameters
     public void GetFilmListSlowerWithCategoryParameterAndRatingTest()
     {
         // Arrange
-        var sut = new ViewsSakilaAndParameters();
+        var sut = new Examples2();
         
         // Act
         var actionFilmsPg13 = sut.GetFilmListSlowerWithCategoryParameterAndRating("Action", "PG-13");
@@ -169,7 +379,7 @@ public class ViewsSakilaAndParameters
     public void GetFilmListSlowerWithCategoryParameterAndRatingOptionalParameterTest()
     {
         // Arrange
-        var sut = new ViewsSakilaAndParameters();
+        var sut = new Examples2();
         
         // Act -- with one parameter (rating)
         var pg13Films = sut.GetFilmListSlowerWithCategoryParameterAndRatingOptionalParameter(rating: "PG-13");
@@ -244,7 +454,7 @@ public class ViewsSakilaAndParameters
     public void GetFilmListSlowerWithPagingAndSortingTest()
     {
         // Arrange
-        var sut = new ViewsSakilaAndParameters();
+        var sut = new Examples2();
         
         // Act
         var films = sut.GetFilmListSlowerWithPagingAndSorting();
@@ -297,7 +507,7 @@ public class ViewsSakilaAndParameters
     public void GetFilmsWithPagingAndSortingTest()
     {
         // Arrange
-        var sut = new ViewsSakilaAndParameters();
+        var sut = new Examples2();
         
         // Act
         var films = sut.GetFilmsWithPagingAndSorting(new PageAndSortParameters());
@@ -322,7 +532,7 @@ public class ViewsSakilaAndParameters
     public void GetFilmsWithPagingAndSortingWithParametersAndObjectShouldBeTheSame()
     {
         // Arrange
-        var sut = new ViewsSakilaAndParameters();
+        var sut = new Examples2();
         
         // Act
         var films = sut.GetFilmListSlowerWithPagingAndSorting();
@@ -376,7 +586,7 @@ public class ViewsSakilaAndParameters
     public void FilmsWithSqlBuilderTest()
     {
         // Arrange
-        var sut = new ViewsSakilaAndParameters();
+        var sut = new Examples2();
         
         // Act
         var films = sut.FilmsWithSqlBuilder();
@@ -433,7 +643,7 @@ public class ViewsSakilaAndParameters
     public void GetFilmsWithSqlBuilderAndParametersTest()
     {
         // Arrange
-        var sut = new ViewsSakilaAndParameters();
+        var sut = new Examples2();
         
         
         var queryParameters = new QueryParameters()
