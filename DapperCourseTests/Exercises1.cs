@@ -70,7 +70,7 @@ public class Exercises1
     // it returns an object? (nullable object).
     // This is because the ExecuteScalar() method can return null.
     // We know that the query will always return a value, so we can cast it to the correct type.
-    // In the next exercise we will use the ExecuteScalar<T> method, this is a better method,
+    // In the next exercise we will use the ExecuteScalar<T>() method, this is a better method,
     // because it returns a strongly typed value!
     public int ExerciseScalar1()
     {

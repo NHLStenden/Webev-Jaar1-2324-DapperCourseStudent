@@ -597,8 +597,6 @@ public class Examples2
     
     public class QueryParameters
     {
-        public int Length { get; set; } = 120;
-        public string Rating { get; set; } = "PG-13";
         public int PageSize { get; set; } = 10;
         public int Offset { get; set; } = 0;
         

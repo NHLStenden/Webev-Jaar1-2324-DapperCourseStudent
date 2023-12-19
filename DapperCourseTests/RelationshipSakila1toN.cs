@@ -57,7 +57,9 @@ public class RelationshipSakila1toN
             }, splitOn: "CityIdSplit");
 
         //grouping by country
-        var countriesGrouped = countries.GroupBy(x => x.CountryId).Select(g => new Country()
+        var countriesGrouped = countries
+            .GroupBy(x => x.CountryId)
+            .Select(g => new Country()
         {
             CountryId = g.Key,
             Name = g.First().Name,
@@ -153,6 +155,8 @@ public class RelationshipSakila1toN
                 SELECT ci.city_id AS CityId, ci.city AS Name, ci.country_id AS CountryId, ci.last_update AS LastUpdate 
                 FROM city ci 
             """;
+        
+        //sort by country id, then we can also do it in one loop (maybe simpler then code below)
         
         using var connection = new MySqlConnection(GetConnectionStringForShop());
         var countries = connection.QueryMultiple(sql);
