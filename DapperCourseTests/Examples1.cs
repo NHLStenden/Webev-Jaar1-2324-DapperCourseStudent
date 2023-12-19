@@ -3,7 +3,7 @@ using MySql.Data.MySqlClient;
 
 namespace DapperCourse;
 
-public class SimpleQueries
+public class Examples1
 {
     // Create the movies database and tables using the createMovies.sql in the SQL folder.
     // Load the data into the database, by executing the insertMovies.sql script in the SQL folder.

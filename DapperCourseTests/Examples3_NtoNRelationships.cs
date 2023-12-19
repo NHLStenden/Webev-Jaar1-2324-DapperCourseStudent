@@ -5,7 +5,7 @@ using JsonSerializer = System.Text.Json.JsonSerializer;
 
 namespace DapperCourseTests;
 
-public class RelationshipsSakilaNtoN
+public class Examples3_NtoNRelationships
 {    
     private static string GetConnectionString()
     {
@@ -75,7 +75,7 @@ public class RelationshipsSakilaNtoN
     public void GetFilmsWithActorsTest()
     {
         // Arrange
-        var sut = new RelationshipsSakilaNtoN();
+        var sut = new Examples3_NtoNRelationships();
         
         // Act
         var films = sut.GetFilmsWithActors();
