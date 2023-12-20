@@ -290,6 +290,7 @@ public class Examples3_1toNRelationships
         await Verify(countries);
     }
     
+    //JSON Method
     //In my opinion this is the best solution, because we do all the work in the database
     //The problem with the previous solutions is that we need to do a lot of work outside of the database
     //Why don't we return just the structure that we need. Whit JSON we can do this!

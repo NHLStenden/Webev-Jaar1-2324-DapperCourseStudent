@@ -154,6 +154,7 @@ public class RelationshipsSakila
     //The name of table is Country and it has a column named Country (same name as the table),
     //in C# we can't have a property with the same name as the class! So we need to give it a different name, such as Name.
     //Don't forget to use the AS keyword in the SQL query to give country (column name) a different name.
+    //This AS keyword is used to give a column a different name which officially is called an alias.
     
     //Take a look at the result, the Id's are zero for the foreign keys,
     //this is because Dapper is a simple mapper and doesn't know which column belongs to which property

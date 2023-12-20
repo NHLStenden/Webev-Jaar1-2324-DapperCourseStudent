@@ -628,10 +628,8 @@ public class Examples2
         }
         
         sqlBuilder.AddParameters(new { PageSize = queryParameters.PageSize, Offset = queryParameters.Offset });
-            
         
         var template = sqlBuilder.AddTemplate("SELECT /**select**/ FROM nicer_but_slower_film_list /**where**/ /**orderby**/ LIMIT @PageSize OFFSET @Offset");
-        
         
         var films = connection.Query<FilmListSlower>(template.RawSql, template.Parameters);
         return films.ToList();
