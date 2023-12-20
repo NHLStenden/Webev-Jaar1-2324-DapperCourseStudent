@@ -44,7 +44,9 @@ public class Examples3_1toNRelationships
         string sql =
             """
                 SELECT c.country_id AS CountryId, c.country AS Name, c.last_update AS LastUpdate,
-                       ci.city_id AS CityIdSplit,
+                       
+                       'CitySplit' AS CitySplit,
+                       
                        ci.city_id AS CityId, ci.city AS Name, ci.country_id AS CountryId, ci.last_update AS LastUpdate
                 FROM country c
                     JOIN city ci on ci.country_id = c.country_id
@@ -58,7 +60,7 @@ public class Examples3_1toNRelationships
                 country.Cities = country.Cities ?? new List<City>();
                 country.Cities.Add(city);
                 return country;
-            }, splitOn: "CityIdSplit");
+            }, splitOn: "CitySplit");
 
         //grouping by country
         var countriesGrouped = countries
@@ -109,7 +111,9 @@ public class Examples3_1toNRelationships
         string sql =
             """
                 SELECT c.country_id AS CountryId, c.country AS Name, c.last_update AS LastUpdate,
-                       ci.city_id AS CityIdSplit,
+                       
+                       'CitySplit' AS CitySplit,
+                       
                        ci.city_id AS CityId, ci.city AS Name, ci.country_id AS CountryId, ci.last_update AS LastUpdate
                 FROM country c
                     JOIN city ci on ci.country_id = c.country_id
@@ -131,7 +135,7 @@ public class Examples3_1toNRelationships
                 country.Cities = country.Cities ?? new List<City>();
                 country.Cities.Add(city);
                 return country;
-            }, splitOn: "CityIdSplit");
+            }, splitOn: "CitySplit");
         
         return countriesDictionary.Values.ToList();
     }

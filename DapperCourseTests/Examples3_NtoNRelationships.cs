@@ -12,20 +12,7 @@ public class Examples3_NtoNRelationships
         return "Server=localhost;port=3306;Database=sakila;Uid=root;Pwd=Test@1234!";
     }
     
-    private string sql =
-        """
-        SELECT m.film_id as FilmId, m.title, m.description as Description, 
-               m.release_year as ReleaseYear, language_id as LanguageId,
-                m.original_language_id as OriginalLanguageId, m.rental_duration as RentalDuration,
-                m.rental_rate as RentalRate, m.length as Length, m.replacement_cost as ReplacementCost,
-                m.rating, m.special_features as SpecialFeatures, m.last_update as LastUpdate,
-               JSON_ARRAYAGG(JSON_OBJECT('ActorId', a.actor_id, 'FirstName', a.last_name, 'LastName', a.first_name, 'LastUpdate', DATE_FORMAT(a.last_update, '%Y-%m-%dT%TZ'))) AS actors
-        FROM 
-            film m JOIN 
-                film_actor ma ON m.film_id = ma.film_id JOIN 
-                    actor a ON ma.actor_id = a.actor_id
-        GROUP BY m.film_id
-        """;
+
 
 
 
@@ -45,7 +32,7 @@ public class Examples3_NtoNRelationships
         public string SpecialFeatures { get; set; } = null!;
         public DateTime LastUpdate { get; set; }
 
-        public List<Actor> Actors { get; set; } = null!;
+       
     }
 
 
@@ -55,32 +42,65 @@ public class Examples3_NtoNRelationships
         public string FirstName { get; set; } = null!;
         public string LastName { get; set; } = null!;
         public DateTime LastUpdate { get; set; }
+        
+        public List<Film> Films { get; set; } = null!;
     }
     
-    public List<Film> GetFilmsWithActors()
+    //In this example we will get The Actors with their Films
+    //We use JSON_ARRAYAGG to get the Films as a JSON array
+    //We have no control over the order of the JSON array
+    //Maybe this a an solution, but it's out of this scope for this course:
+    //https://stackoverflow.com/questions/60572309/how-to-order-by-a-json-object-in-mysql
+    public List<Actor> GetActorsIncludeFilms()
     {
+        string sql =
+            """
+            SELECT JSON_OBJECT(
+                           'ActorId', a.actor_id,
+                           'FirstName', a.first_name,
+                           'LastName', a.last_name,
+                           'Films', JSON_ARRAYAGG(
+                                   JSON_OBJECT(
+                                           'FilmId', f.film_id,
+                                           'Title', f.title,
+                                           'Description', f.description,
+                                           'ReleaseYear', f.release_year,
+                                           'Length', f.length,
+                                           'Rating', f.rating,
+                                           'SpecialFeatures', f.special_features
+                                   )
+                            )
+                   )
+            FROM 
+                actor a 
+                    JOIN film_actor fa ON a.actor_id = fa.actor_id
+                        JOIN film f ON fa.film_id = f.film_id
+            GROUP BY a.actor_id
+            ORDER BY a.actor_id
+            LIMIT 3
+            """;
+        
         using var connection = new MySqlConnection(GetConnectionString());
-        var films = connection.Query<Film, string, Film>(sql,
-            (film, actor) =>
-            {
-                film.Actors = film.Actors ?? new List<Actor>();
-                var actors = JsonSerializer.Deserialize<List<Actor>>(actor);
-                film.Actors.AddRange(actors);
-                return film;
-            }, splitOn: "actors");
-        return films.ToList();
+        var actorsAsJson = connection.Query<string>(sql);
+        var actors = new List<Actor>();
+        foreach (var actorAsJson in actorsAsJson)
+        {
+            var actor = JsonSerializer.Deserialize<Actor>(actorAsJson);
+            actors.Add(actor);
+        }
+        return actors.ToList();
     }
     
     [Test]
-    public void GetFilmsWithActorsTest()
+    public async Task GetActorsIncludeFilmsTest()
     {
         // Arrange
         var sut = new Examples3_NtoNRelationships();
         
         // Act
-        var films = sut.GetFilmsWithActors();
+        var films = sut.GetActorsIncludeFilms();
         
         // Assert
-        Assert.That(films, Is.Not.Null);
+        await Verify(films);
     }
 }

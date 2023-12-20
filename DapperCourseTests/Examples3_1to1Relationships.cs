@@ -146,7 +146,7 @@ public class Examples3_1to1Relationships
                 c.last_name AS LastName, c.email AS Email, c.address_id AS AddressId, c.active AS Active,
                 c.create_date AS CreateDate, c.last_update AS LastUpdate,
                 
-                c.address_id AS AddressIdSplit,
+                'AddressSplit' AS AddressSplit,
                 
                 a.address_id AS AddressId, a.address AS Address1, a.address2 AS Address2, a.district AS District,
                 a.city_id AS CityId, a.postal_code AS PostalCode, a.phone AS Phone, 
@@ -166,7 +166,7 @@ public class Examples3_1to1Relationships
             {
                 customer.Address = address;
                 return customer;
-            }, splitOn: "AddressId");
+            }, splitOn: "AddressSplit");
         return customers.ToList();
     }
     
@@ -208,13 +208,13 @@ public class Examples3_1to1Relationships
                 c.create_date AS CreateDate, c.last_update AS LastUpdate, 
                 c.address_id AS AddressId,
                 
-                a.address_id AS AddressIdSplit,
+                'AddressSplit' AS AddressSplit,
                 
                 a.address_id AS AddressId, a.address AS Address1, a.address2 AS Address2, a.district AS District,
                 a.postal_code AS PostalCode, a.phone AS Phone,
                 a.location AS Location, a.last_update AS LastUpdate,
                 
-                ci.city_id AS CityIdSplit,
+                'CitySplit' AS CitySplit,
                 
                 ci.city_id AS CityId,
                 ci.city as Name, ci.country_id AS CountryId, ci.last_update as LastUpdate
@@ -233,7 +233,7 @@ public class Examples3_1to1Relationships
                 customer.Address = address;
                 customer.Address.City = city;
                 return customer;
-            }, splitOn: "AddressIdSplit, CityIdSplit");
+            }, splitOn: "AddressSplit, CitySplit");
         return customers.ToList();
     }
     
@@ -278,18 +278,21 @@ public class Examples3_1to1Relationships
                 c.last_name AS LastName, c.email AS Email, c.active AS Active,
                 c.address_id AS AddressId,  
                 c.create_date AS CreateDate, c.last_update AS LastUpdate,
-                c.customer_id as CustomerIdSplit,
+                
+                'CustomerSplit' as CustomerSplit,
                 
                 a.address_id AS AddressId,
                 a.address AS Address1, 
                 a.address2 AS Address2, a.district AS District,
                 a.postal_code AS PostalCode, a.phone AS Phone,
                 a.location AS Location, a.last_update AS LastUpdate,
-                a.address_id AS AddressIdSplit,
+                
+                'AddressSplit' AS AddressSplit,
                 
                 a.city_id AS CityId,
                 ci.city as Name, ci.last_update as LastUpdate,
-                ci.city_id AS CityIdSplit,
+                
+                'CitySplit' AS CitySplit,
                 
                 ci.country_id AS CountryId,
                 co.country AS Name, co.last_update AS LastUpdate
@@ -313,7 +316,7 @@ public class Examples3_1to1Relationships
                 customer.Address.City.Country = country;
                 // customer.Address.City.CountryId = country.CountryId;
                 return customer;
-            }, splitOn: "CustomerIdSplit, AddressIdSplit, CityIdSplit");
+            }, splitOn: "CustomerSplit, AddressSplit, CitySplit");
         return customers.ToList();
     }
     
