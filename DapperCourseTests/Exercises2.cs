@@ -1,7 +1,6 @@
-using System.Data;
 using Dapper;
 using FluentAssertions;
-using MySql.Data.MySqlClient;
+using MySqlConnector;
 
 namespace DapperCourseTests;
 
@@ -16,7 +15,7 @@ public class Exercises2
     // it's a movie rental database, it contains tables like:
     // actor, address, category, city, country, customer, film, film_actor, film_category, inventory, language, payment, rental, staff, store
     // the structure (database diagram) can be found here:
-    // https://dev.mysql.com/doc/sakila/en/sakila-structure.html
+    // https://dev.mysql.com/doc/sakila/en/sakila-structure.html (the direction of the arrows is incorrect!)
     private static string GetConnectionString()
     {
         return "Server=localhost;port=3306;Database=sakila;Uid=root;Pwd=Test@1234!";
@@ -31,10 +30,14 @@ public class Exercises2
         count.Should().Be(1000);
     }
     
-    // Write a query that return the one customer by its id
-    // Use string interpolation or concatenation to create the query string and pass it to the Query method
+    // NEVER EVER DO THIS AGAIN, THIS IS AN SQL INJECTION EXAMPLE!
+    // Write a query that returns one customer by its email.
+    // Use string interpolation ($" ... WHERE email = '{email}'") or concatenation to create the query string
+    // and pass it to the Query method.
     // Use the Customer class below to map the result
-    // Use the Query() method to execute the query, (it was better to use QuerySingle() method, but this is harder to get all the data with SQL injection)
+    // Use the Query() method to execute the query, (it was better to use QuerySingle() method,
+    // but this is harder to get all the data with SQL injection)
+    // NEVER EVER DO THIS AGAIN, THIS IS AN SQL INJECTION EXAMPLE!
     public class CustomerForSqlInjection
     {
         public int CustomerId { get; set; }
@@ -64,6 +67,31 @@ public class Exercises2
 
         var allCustomers = GetCustomerByEmail("PATRICIA.JOHNSON@sakilacustomer.org' OR 1 = 1 -- ");
         allCustomers.Should().HaveCount(599); //this demonstrates SQL injection, we get all the customers instead of the one we want
+    }
+    
+    //Fix the previous exercise, use SQL Parameter Placeholders (WHERE email = @Email).
+    //Always use SQL Parameter Placeholders!!!!!
+    public List<CustomerForSqlInjection> GetCustomerByEmail2(string email)
+    {
+        using var connection = new MySqlConnection(GetConnectionString());
+        var sql = $"""
+                    SELECT customer_id as CustomerId, first_name as FirstName, last_name as LastName, email as Email
+                    FROM customer WHERE email = @email
+                   """;
+        var customer = connection.Query<CustomerForSqlInjection>(sql, new {email});
+        return customer.ToList();
+    }
+    
+    [Test]
+    public void SqlInjectionPreventionTest()
+    {
+        var email = "PATRICIA.JOHNSON@sakilacustomer.org";
+        using var connection = new MySqlConnection(GetConnectionString());
+        
+        GetCustomerByEmail(email).Should().HaveCount(1);
+
+        var allCustomers = GetCustomerByEmail2("PATRICIA.JOHNSON@sakilacustomer.org' OR 1 = 1 -- ");
+        allCustomers.Should().HaveCount(0); //this demonstrates SQL injection, we get all the customers instead of the one we want
     }
 
     
@@ -123,8 +151,8 @@ public class Exercises2
                            f.last_update as FilmLastUpdate
                     FROM rental r
                         JOIN customer c ON r.customer_id = c.customer_id
-                        JOIN inventory i ON r.inventory_id = i.inventory_id
-                        JOIN film f ON i.film_id = f.film_id
+                            JOIN inventory i ON r.inventory_id = i.inventory_id
+                                JOIN film f ON i.film_id = f.film_id
                    """;
         connection.Execute(sql);
 
@@ -146,10 +174,10 @@ public class Exercises2
     }
 
     //In the previous exercise we created a view, this one has a lot (maybe too much) columns.
-    //We can query the view with only the columns that we need and we can rename the columns
+    //We can query the view with only the columns that we need and we can rename the columns with the AS keyword (or space).
     //Create a query based on the view from the previous exercise, but only select the following columns:
     //CustomerId, Lastname, Firstname, AmountOfRentals
-    //Order Descending by AmountOfRentals
+    //Order Descending (DESC) by AmountOfRentals
     //Select only the first 10 rows
     //This query select the top 10 customers with the most rentals
 
@@ -195,7 +223,7 @@ public class Exercises2
     //Create a query that returns the following columns:
     //CountryName, AmountOfRentalsByCountry
     //in other words, you should join the rental_view with the country table, this could not be done directly,
-    //so multiple joins are needed
+    //so multiple joins are needed.
     //Order descending by AmountOfRentalsByCountry
     //Select only the first 10 rows
     
@@ -311,7 +339,7 @@ public class Exercises2
     //Create a query that returns all the customers that live in a certain city (city is a parameter).
     //Use parameter placeholders (@city) and pass the parameter to the Query method.
     //You could use a view (maybe you already created one) or join the tables directly, it's up to you.
-    //Use the Customer class (CustomerSearch) below to map the result, it has a the following properties:
+    //Use the Customer class (CustomerSearch) below to map the result, it has the following properties:
     //CustomerId, FirstName, LastName, Email
     //Order by LastName, FirstName
     //Limit the result to 10 rows
@@ -328,17 +356,17 @@ public class Exercises2
     {
         string sql =
             """
-                SELECT c.customer_id as CustomerId, c.last_name as LastName, c.first_name as FirstName, c.email as Email
+                SELECT c.customer_id AS CustomerId, c.last_name AS LastName, c.first_name AS FirstName, c.email AS Email
                 FROM customer c
-                    JOIN sakila.address a on c.address_id = a.address_id
-                        JOIN sakila.city ci on a.city_id = ci.city_id WHERE ci.city = @City
+                    JOIN address a on c.address_id = a.address_id
+                        JOIN city ci on a.city_id = ci.city_id WHERE ci.city = @city
                 ORDER BY c.last_name, c.first_name
                 LIMIT 10
             """;
         
         using var connection = new MySqlConnection(GetConnectionString());
         var result = connection.Query<CustomerSearch>(sql, 
-            new {City = city}).ToList();
+            new {city}).ToList();
 
         return result;
     }
@@ -375,8 +403,8 @@ public class Exercises2
             """
                 SELECT c.customer_id as CustomerId, c.last_name as LastName, c.first_name as FirstName, c.email as Email
                 FROM customer c
-                    JOIN sakila.address a on c.address_id = a.address_id
-                        JOIN sakila.city ci on a.city_id = ci.city_id 
+                    JOIN address a on c.address_id = a.address_id
+                        JOIN city ci on a.city_id = ci.city_id 
                 WHERE (@City IS NULL OR ci.city = @City)
                 ORDER BY c.last_name, c.first_name
                 LIMIT 10
@@ -416,7 +444,7 @@ public class Exercises2
     //Let's create a query that returns all the customers that live in a certain city (city is a parameter).
     //Or all the customers that live in a certain country (country is a parameter).
     //Both parameters are optional.
-    //If both parameters are not passed, we want to return all the customers.
+    //If both parameters are empty (null), we want to return all the customers.
     //Use parameter placeholders (@city, @country) and pass the parameters to the Query method.
     //LIMIT the result to 10 rows, and order by LastName, FirstName
     
@@ -429,7 +457,8 @@ public class Exercises2
                     JOIN sakila.address a on c.address_id = a.address_id
                         JOIN sakila.city ci on a.city_id = ci.city_id
                             JOIN sakila.country co on ci.country_id = co.country_id
-                WHERE (@City IS NULL OR ci.city = @City) AND (@Country IS NULL OR co.country = @Country)
+                WHERE (@City IS NULL OR ci.city = @City) 
+                  AND (@Country IS NULL OR co.country = @Country)
                 ORDER BY c.last_name, c.first_name
                 LIMIT 10
             """;
@@ -488,13 +517,15 @@ public class Exercises2
     //Country, City, PageNumber and PageSize
     //The default value for PageNumber is 1 and for PageSize is 10
     //The default value for Country and City is null
-    //Use the same query as in the previous exercise, but now use the CustomerSearchParameters object to pass the parameters to the Query method.
+    //Use the same query as in the previous exercise, but now use the CustomerSearchParameters object
+    //to pass the parameters to the Query method.
     //In the query use the Offset and PageSize properties to limit the result to the correct page.
     public class CustomerSearchParameters
     {
         public string? Country { get; set; } = null;
         public string? City { get; set; } = null;
         public int PageNumber { get; set; } = 1;
+
         public int Offset => (PageNumber - 1) * PageSize;
         public int PageSize { get; set; } = 10;
     }
@@ -506,9 +537,9 @@ public class Exercises2
             """
                 SELECT c.customer_id as CustomerId, c.last_name as LastName, c.first_name as FirstName, c.email as Email
                 FROM customer c
-                    JOIN sakila.address a on c.address_id = a.address_id
-                        JOIN sakila.city ci on a.city_id = ci.city_id
-                            JOIN sakila.country co on ci.country_id = co.country_id
+                    JOIN address a on c.address_id = a.address_id
+                        JOIN city ci on a.city_id = ci.city_id
+                            JOIN country co on ci.country_id = co.country_id
                 WHERE (@City IS NULL OR ci.city = @City) AND (@Country IS NULL OR co.country = @Country)
                 ORDER BY c.last_name, c.first_name
                 LIMIT @PageSize OFFSET @Offset
@@ -537,13 +568,22 @@ public class Exercises2
         var result = sut.ExerciseParameter4(customerSearchParameters);
 
         // Assert
-        result.Should().HaveCount(2);
+        result.Should().HaveCount(10);
 
         result.First().CustomerId.Should().Be(252);
         result.First().LastName.Should().Be("HOFFMAN");
 
         result.Last().CustomerId.Should().Be(512);
+
+        var customerSearchParameters2 = new CustomerSearchParameters()
+        {
+            PageNumber = 3, PageSize = 10
+        };
         
+        // Act
+        var result2 = sut.ExerciseParameter4(customerSearchParameters2);
+        
+        //TODO: fix test
     }
     
     
@@ -557,7 +597,8 @@ public class Exercises2
     //If we remove the LIMIT 0, we copy all the data from the customer table to the customer_copy table.
     //This can be useful if we want to create a copy of a table. But not for this exercise.
     //The problem is that the customer_copy table has no constraints such as primary keys, foreign keys, ...
-    //In order to insert we need ta add at least a primary key. Make sure also add the auto increment property to the primary key.
+    //In order to insert we need ta add at least a primary key. Make sure also add the auto increment property
+    //to the primary key.
     //To do this
     //alter table customer_copy
     // add constraint customer_copy_pk
@@ -565,14 +606,17 @@ public class Exercises2
     //alter table customer_copy MODIFY COLUMN customer_id INT AUTO_INCREMENT
     //
     //Also create a table called address_copy with the same trick, make sure it has a primary key.
-    //Also use an object for the parameters.
+    //
     //For inserts we can use the Execute() method, this method returns the number of rows affected.
+    //Also use an object for the parameters.
     //Actually this is not what we want, we want to return the last inserted id.
-    //We would like to return the inserted customerId (generated by the primary key in the database), we can do this with the LAST_INSERT_ID() function.
+    //We would like to return the inserted customerId (generated by the primary key in the database),
+    //we can do this with the LAST_INSERT_ID() function.
     //This function returns the last inserted id.
     // INSERT INTO customer_copy (store_id, first_name, last_name, email, address_id, active, create_date, last_update)
     // VALUES (@StoreId, @FirstName, @LastName, @Email, @AddressId, @Active, @CreateDate, @LastUpdate);
     // SELECT LAST_INSERT_ID();
+    
     //So we can use the ExecuteScalar<int>() method to return the last inserted id.
     public class InsertCustomerParameters
     {
@@ -646,7 +690,9 @@ public class Exercises2
         customerCopy.Should().BeEquivalentTo(insertCustomerParameters, options => options.Excluding(x => x.CustomerId));
     }
     
-    //Let's create a query that insert a new city in the city table.
+    //Optional Question, it's a lot of work.
+    //
+    //Let's create a query that inserts a new city in the city table.
     //A city belongs to a country, so we need to pass the country_id as a parameter.
     //The first step is to make a copy with the same trick as in the previous exercise from the city table and country table.
     //Make sure that the tables have a primary key.
@@ -657,7 +703,7 @@ public class Exercises2
     //Use the ExecuteScalar<int>() method to return the last inserted id.
     //
     //It's hard to test this method if the country_id is reused in the city table.
-    //because we need to create a copy of the city and country table in the method InsertCityExercises.
+    //Because we need to create a copy of the city and country table in the method InsertCityExercises.
     public class InsertCity
     {
         public string City { get; set; } = null!; 
@@ -673,7 +719,6 @@ public class Exercises2
     public int InsertCityExercises(InsertCountry country, InsertCity insertCity)
     {
         string sqlCreateCopyTables = """
-                                       
                                      DROP TABLE IF EXISTS city_copy;
                                         DROP TABLE IF EXISTS country_copy;
                                         CREATE TABLE country_copy as SELECT * FROM country LIMIT 0;
@@ -743,7 +788,6 @@ public class Exercises2
                   SELECT city_id as CityId, city as City, country_id as CountryId, last_update as LastUpdate
                       FROM city_copy
                   """;
-        var citySql = "SELECT city_id AS CityId, country_id AS CountryId, last_update AS LastUpdate  FROM country_copy WHERE country = @Country";
         
         var cityCopy = connection.Query<CityForTest>(sql).First();
         cityCopy.Should().BeEquivalentTo(new CityForTest()
@@ -758,8 +802,6 @@ public class Exercises2
             City = "Brussels",
             LastUpdate = lastUpdated
         };
-        
-        
     }
     
     public class CityForTest
@@ -767,88 +809,5 @@ public class Exercises2
         public int CityId { get; set; }
         public int CountryId { get; set; }
         public DateTime LastUpdate { get; set; }
-    }
-    
-    //It's not always possible to use parameters in a query.
-    //Sometimes we need to use dynamic SQL, take a look at GetFilmsWithSqlBuilderAndParameters(...) method in Example2.cs file and the corresponding test.
-    //
-    //The solution is to use the SqlBuilder class
-    //Let's create a query that returns all the films that have a certain title. But we want to use the SQL Builder
-    //Let's create a similar query as in the example, but not with the nicer_but_slower_film_list view, but with the sales_by_store view.
-    
-    
-    public class QueryParameters
-    {
-        public int PageSize { get; set; } = 10;
-        public int Offset { get; set; } = 0;
-
-        public List<string> SelectColumns { get; set; } = new List<string>();
-
-        public List<(string, object)> WhereColumns { get; set; } = new List<(string, object)>();
-
-        public List<string> OrderByColumns { get; set; } = new List<string>();
-    }
-
-    public class SalesByStore
-    {
-        public string Store { get; set; } = null!;
-        public string Manager { get; set; } = null!;
-        public decimal TotalSales { get; set; }
-    }
-
-    public List<SalesByStore> GetFilmsWithSqlBuilderAndParameters(QueryParameters queryParameters)
-    {
-        using var connection = new MySqlConnection(GetConnectionString());
-        var sqlBuilder = new SqlBuilder();
-        
-        foreach (var selectColumn in queryParameters.SelectColumns)
-        {
-            sqlBuilder.Select(selectColumn);
-        }
-
-        foreach (var whereColumn in queryParameters.WhereColumns)
-        {
-            sqlBuilder.Where(whereColumn.Item1, whereColumn.Item2);
-            
-        }
-        
-        foreach (var orderByColumn in queryParameters.OrderByColumns)
-        {
-            sqlBuilder.OrderBy(orderByColumn);
-        }
-        
-        sqlBuilder.AddParameters(new { PageSize = queryParameters.PageSize, Offset = queryParameters.Offset });
-            
-        
-        var template = sqlBuilder.AddTemplate("SELECT /**select**/ FROM sales_by_store /**where**/ /**orderby**/ LIMIT @PageSize OFFSET @Offset");
-        
-        
-        var films = connection.Query<SalesByStore>(template.RawSql, template.Parameters);
-        return films.ToList();
-    }
-    
-    [Test]
-    public void GetFilmsWithSqlBuilderAndParametersTest()
-    {
-        // Arrange
-        var sut = new Exercises2();
-        var queryParameters = new QueryParameters()
-        {
-            SelectColumns = new List<string>() {"store", "manager", "total_sales"},
-            WhereColumns = new List<(string, object)>() {("store = @Store", new {Store = "Woodridge,Australia"})},
-            OrderByColumns = new List<string>() {"total_sales DESC"},
-            PageSize = 5,
-            Offset = 0
-        };
-
-        // Act
-        var result = sut.GetFilmsWithSqlBuilderAndParameters(queryParameters);
-
-        // Assert
-        result.Should().HaveCount(1);
-        
-        result.First().Store.Should().Be("Woodridge,Australia");
-        result.First().Manager.Should().Be("Jon Stephens");
-        result.First().TotalSales.Should().Be(33726.77m);
     }
 }

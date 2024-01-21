@@ -1,7 +1,7 @@
 using System.Text.Json;
 using Dapper;
 using FluentAssertions;
-using MySql.Data.MySqlClient;
+using MySqlConnector;
 
 namespace DapperCourseTests;
 
@@ -18,7 +18,7 @@ public class ExercisesRelationships
     //ORDER BY payment_id
     //From the perspective of the payment, each payment has one customer (1 to 1).
     //Actually this is a 1 to many relationship, because a customer can have multiple payments.
-    //I have no other 1 to 1 relationships in the sakila database, so I will use the 1 to many relationship as 1 to 1 example.
+    //There are no 1 to 1 relationships in the sakila database, so we will use the 1 to many relationship as 1 to 1 example.
     //Actually 1 to 1 relationships are not very common in databases, because you can just add the columns to the same table.
 
     //Tip: if you are joining two tables or more tables with 1 to 1 relationships, you can use the one query and split the result.
@@ -115,7 +115,7 @@ public class ExercisesRelationships
 
 
 
-    // Same a ExerciseOneToOne, but now use add another join the address table with customer.
+    // Same as ExerciseOneToOne, but now use add another join the address table with customer.
     // The address table has a one to one relationship with the customer table.
     public List<Payment> ExerciseOneToOneTwoJoins()
     {
@@ -136,7 +136,7 @@ public class ExercisesRelationships
                     first_name AS {nameof(Customer.FirstName)},
                     last_name AS {nameof(Customer.LastName)},
                     email AS {nameof(Customer.Email)},
-                    'splitAddress' as SplitAddress,
+                    'SplitAddress' as SplitAddress,
                     a.address_id AS {nameof(Address.AddressId)},
                     address AS {nameof(Address.Address1)}
             FROM payment p
@@ -189,11 +189,12 @@ public class ExercisesRelationships
         payments.Last().Customer.Address.Address1.Should().Be("1325 Fukuyama Street");
     }
 
-    //in this exercise we will move to 1 to many (1 to N) relationships.
-    //a store has many customers (List<Customer>)
+    //In this exercise we will move to 1 to many (1 to N) relationships.
+    //A store has many customers (List<Customer>)
     //Create a query that returns all stores with the customers
     //Order by store_id, customer_id
-    //Limit the result to 10 rows
+    //Limit the result to 10 rows, this create a problem we have only 10 rows,
+    //so we don't have all the customers of each store.
     //Take a look at the examples, try different approaches.
     //  -dictionary method
     public class Store
@@ -249,10 +250,10 @@ public class ExercisesRelationships
 
         await Verify(stores);
     }
-
-    //The same a the previous exercise, but now use the JSON method (see examples)
-    //The JSON method returns all the customers (even with the LIMIT 10)
-    //We we use GROUP BY in SQL we can not USE LIMIT on the aggregated result ( JSON_ARRAYAGG() ).
+    
+    //The same as the previous exercise, but now use the JSON method (see examples).
+    //The JSON method returns all the customers.
+    //We use GROUP BY in SQL we can not use LIMIT on the aggregated result ( JSON_ARRAYAGG() ).
     //No solution is perfect, so you can choose which method you prefer.
     //  -dictionary method
     //  -json method
@@ -277,9 +278,9 @@ public class ExercisesRelationships
                                        'Email', c.email,
                                        'AddressId', c.address_id,
                                        'StoreId', c.store_id
-                           )
-
-                   )  )
+                                      )
+                                 )  
+                            )
             FROM store s
                     JOIN customer c ON s.store_id = c.store_id
             GROUP BY s.store_id

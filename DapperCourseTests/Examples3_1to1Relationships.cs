@@ -1,7 +1,5 @@
 using Dapper;
-using DapperCourse;
-using MySql.Data.MySqlClient;
-using MySql.Data.Types;
+using MySqlConnector;
 
 namespace DapperCourseTests;
 
@@ -45,14 +43,14 @@ public class Examples3_1to1Relationships
         public string Phone { get; set; } = null!;
         public byte[] Location { get; set; }
 
-        public MySqlGeometry LocationAsGeometry
-        {
-            get
-            {
-                var geo = new MySqlGeometry(MySqlDbType.Geometry, Location);
-                return geo;
-            }
-        }
+        // public MySqlGeometry LocationAsGeometry
+        // {
+        //     get
+        //     {
+        //         var geo = new MySqlGeometry(MySqlDbType.Geometry, Location);
+        //         return geo;
+        //     }
+        // }
         public DateTime LastUpdate { get; set; }
     }
     

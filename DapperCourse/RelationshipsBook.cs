@@ -1,6 +1,6 @@
 using Dapper;
 using Dapper.Mapper;
-using MySql.Data.MySqlClient;
+using MySqlConnector;
 
 namespace DapperCourse;
 

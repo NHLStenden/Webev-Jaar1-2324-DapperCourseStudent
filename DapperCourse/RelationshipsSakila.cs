@@ -1,6 +1,5 @@
 using Dapper;
-using MySql.Data.MySqlClient;
-using MySql.Data.Types;
+using MySqlConnector;
 
 namespace DapperCourse;
 
@@ -60,16 +59,16 @@ public class RelationshipsSakila
         public City City { get; set; } = null!;
         public string PostalCode { get; set; } = null!;
         public string Phone { get; set; } = null!;
-        public byte[] Location { get; set; }
-
-        public MySqlGeometry LocationAsGeometry
-        {
-            get
-            {
-                var geo = new MySqlGeometry(MySqlDbType.Geometry, Location);
-                return geo;
-            }
-        }
+        // public byte[] Location { get; set; }
+        //
+        // public MySqlGeometry LocationAsGeometry
+        // {
+        //     get
+        //     {
+        //         var geo = new MySqlGeometry(MySqlDbType.Geometry, Location);
+        //         return geo;
+        //     }
+        // }
         public DateTime LastUpdate { get; set; }
     }
 
@@ -96,7 +95,7 @@ public class RelationshipsSakila
             {
                 customer.Address = address;
                 return customer;
-            }, splitOn: "AddressId");
+            }, splitOn: "AddressIdSplit");
         return customers.ToList();
     }
 

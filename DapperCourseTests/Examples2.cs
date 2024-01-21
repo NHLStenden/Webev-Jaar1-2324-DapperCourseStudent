@@ -1,6 +1,6 @@
 using Dapper;
 using FluentAssertions;
-using MySql.Data.MySqlClient;
+using MySqlConnector;
 
 namespace DapperCourseTests;
 
@@ -331,7 +331,8 @@ public class Examples2
         movies.Should().BeEmpty();
     }
     
-    public List<FilmListSlower> GetFilmListSlowerWithCategoryParameterAndRating(string category, string rating)
+    public List<FilmListSlower> GetFilmListSlowerWithCategoryParameterAndRating
+                                    (string category, string rating)
     {
         using var connection = new MySqlConnection(GetConnectionString());
         var sql = """
@@ -358,8 +359,8 @@ public class Examples2
         Assert.That(actionFilmsPg13, Is.Not.Null);
     }
 
-    public List<FilmListSlower> GetFilmListSlowerWithCategoryParameterAndRatingOptionalParameter(string category = null,
-        string rating = null)
+    public List<FilmListSlower> GetFilmListSlowerWithCategoryParameterAndRatingOptionalParameter
+        (string category = null, string rating = null)
     {
         using var connection = new MySqlConnection(GetConnectionString());
         var sql = """

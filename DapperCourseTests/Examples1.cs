@@ -1,5 +1,5 @@
 using Dapper;
-using MySql.Data.MySqlClient;
+using MySqlConnector;
 
 namespace DapperCourse;
 
@@ -48,7 +48,7 @@ public class Examples1
     }
 
     // Write a SQL query to count the number of female actors in the database
-    // Use the ExecuteScalar<T> method, that returns the first column of the first row as the specified T type parameter
+    // Use the ExecuteScalar<T> method, that returns the first column of the first row as the specified T type parameter.
     // A method that returns a strongly typed value is always better than a method that returns a dynamic type!
     public int ExerciseScalar2()
     {
@@ -58,7 +58,7 @@ public class Examples1
         return count;
     }
     
-    // Of course we an select a different kind of scalar value, like a string, boolean, etc.
+    // Of course we can select a different kind of scalar value, like a string, boolean, etc.
     // Are there any reviews that don't have a name (NULL) or an empty string.
     // Write a SQL query to find out.
     public bool ExerciseScalar3()
@@ -89,13 +89,12 @@ public class Examples1
         return name;
     }
     
-    // One more exercise with scalar values. Which movie (return title) has the highest average rating?
+    // One more exercise with scalar values.
+    // Which movie (return title) has the highest average rating?
     public string ExerciseScalar6()
     {
-        string sql = @"SELECT Title FROM Movies m JOIN Ratings r ON m.MovieId = r.MovieId
-                        GROUP BY Title
-                        ORDER BY AVG(Stars) DESC
-                        LIMIT 1";
+        string sql = @"SELECT Title FROM Movies WHERE MovieId = 
+                            (SELECT MovieId FROM Ratings GROUP BY MovieId ORDER BY AVG(Stars) DESC LIMIT 1)";
         using var connection = new MySqlConnection(GetConnectionString());
         var title = connection.ExecuteScalar<string>(sql);
         return title;

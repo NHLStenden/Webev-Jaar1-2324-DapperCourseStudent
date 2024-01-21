@@ -1,6 +1,5 @@
-using Argon;
 using Dapper;
-using MySql.Data.MySqlClient;
+using MySqlConnector;
 using JsonSerializer = System.Text.Json.JsonSerializer;
 
 namespace DapperCourseTests;

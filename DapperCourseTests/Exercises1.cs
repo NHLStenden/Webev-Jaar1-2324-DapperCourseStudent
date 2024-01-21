@@ -1,7 +1,6 @@
 using Dapper;
-using DapperCourse;
 using FluentAssertions;
-using MySql.Data.MySqlClient;
+using MySqlConnector;
 
 namespace DapperCourseTests;
 
@@ -10,10 +9,10 @@ public class Exercises1
 {
     // Create the movies database and tables using the createMovies.sql in the SQL folder.
     // Load the data into the database, by executing the insertMovies.sql script in the SQL folder.
-    // This is aa exercises to make sure that you can connect to the database.
-    // You can use the NuGet Package Manager or the Package Manager Console to install MySql.Data. (Database provider for mysql, sometimes called connector or driver)
+    // This is an exercises to make sure that you can connect to the database.
+    // You can use the NuGet Package Manager or the console to install MySql.Data package. (Database provider for mysql, sometimes called connector or driver)
     // https://www.learndapper.com/database-providers (go to MySql section)
-    // In the Package Manager Console, type: Install-Package MySql.Data
+    // In the console type: dotnet add package MySql.Data 
     // If you are using Rider, you can use the NuGet tool window.
     // If you are using Visual Studio, you can use the NuGet Package Manager.
     // You can find the connection string for mysql here: https://www.connectionstrings.com/mysql/ .
@@ -30,7 +29,7 @@ public class Exercises1
     // If you are using Mac, the database name, table names are case sensitive.
     // The problem is make sure the case is correct in the SQL because the deployment can be done on a different operating system.
     
-    // Rider can help you with this. If you type the name of a table or column, it will show you the correct case.
+    // Rider can help you with this!!! If you type the name of a table or column, it will show you the correct case.
     // Rider can inspect the database schema (structure of database, such as tables, columns, views, etc.)
     // and assist you with writing correct SQL and also the case sensitivity of the table and column names.
     private string GetConnectionString()
@@ -49,7 +48,7 @@ public class Exercises1
     [Test]
     public void Exercise0Test()
     {
-        // Arrange®
+        // Arrange
         var sut = new Exercises1();
         
         // Act
@@ -57,19 +56,19 @@ public class Exercises1
         
         // Assert
         result.Should().BeTrue();
+        // Assert.AreEqual(true, result); 
     }
     
-    //First we will start with some simple queries, that only return one single value (1 row with 1 column).
-    //This is called a scalar value.
-    //https://www.learndapper.com/dapper-query/selecting-scalar-values
-
-    
+    // First we will start with some simple queries, that only return one single value (1 row with 1 column).
+    // This is called a scalar value.
+    // https://www.learndapper.com/dapper-query/selecting-scalar-values
+    // 
     // Write a SQL query to find the number of movies in the database.
-    // use the ExecuteScalar() method, that	Returns the first column of the first row as a dynamic type.
-    // cast it to the correct type. There is a small problem with this method,
-    // it returns an object? (nullable object).
-    // This is because the ExecuteScalar() method can return null.
-    // We know that the query will always return a value, so we can cast it to the correct type.
+    // Use the ExecuteScalar() method, this	returns the first column of the first row as a dynamic type.
+    // Cast it to the correct type. There is a small problem with this method,
+    // it returns an object? (nullable object). Object? means an object or null type.
+    // This is because the ExecuteScalar() method can return null. 
+    // We know that the query will always returns a value, so we can cast it to the correct type (Convert.ToInt32(...)).
     // In the next exercise we will use the ExecuteScalar<T>() method, this is a better method,
     // because it returns a strongly typed value!
     public int ExerciseScalar1()
@@ -94,12 +93,12 @@ public class Exercises1
         count.Should().Be(28);
     }
     
-    // Write a SQL query to count the number of female actors in the database
-    // Use the ExecuteScalar<T> method, that returns the first column of the first row as the specified T type parameter
+    // Write a SQL query to count the number of female actors in the database.
+    // Use the ExecuteScalar<T>(sql) method, that returns the first column of the first row as the specified T type parameter.
     // A method that returns a strongly typed value is always better than a method that returns a dynamic type!
     public int ExerciseScalar2()
     {
-        string sql = "SELECT COUNT(*) FROM Actors WHERE Gender = 'M' ";
+        string sql = "SELECT COUNT(*) FROM Actors WHERE Gender = 'F' ";
         using var connection = new MySqlConnection(GetConnectionString());
         var count = connection.ExecuteScalar<int>(sql);
         return count;
@@ -115,11 +114,12 @@ public class Exercises1
         int count = sut.ExerciseScalar2();
         
         // Assert
-        count.Should().Be(10);
+        count.Should().Be(7);
     }
     
-    // Of course we an select a different kind of scalar value, like a string, boolean, etc.
-    // Are there any reviews that don't have a name (NULL) or an empty string.
+    // Of course we can select a different type of scalar value, like a string, boolean, etc.
+    // Are there any reviews with an empty name or no name (null)?
+    // Try to use the ExecuteScalar<bool>() method to return a boolean.
     // Write a SQL query to find out.
     public bool ExerciseScalar3()
     {
@@ -164,12 +164,12 @@ public class Exercises1
         count.Should().Be(1);
     }
     
-    // Write a SQL query to find the actor full name (FirstName + ' ' + LastName) which preforms in the most movies.
+    // Write a SQL query to find the actor full name (FirstName + ' ' + LastName) which performs in the most movies.
     // To concatenate strings in MySql use the CONCAT function.
     public string ExerciseScalar5()
     {
         string sql = @"SELECT CONCAT(FirstName, ' ', LastName) FROM Actors WHERE ActorId = 
-                            (SELECT ActorId FROM MovieCasts GROUP BY ActorId ORDER BY COUNT(*) LIMIT 1)";
+                            (SELECT ActorId FROM MovieCasts GROUP BY ActorId ORDER BY COUNT(*) DESC LIMIT 1)";
         using var connection = new MySqlConnection(GetConnectionString());
         var name = connection.ExecuteScalar<string>(sql);
         return name;
@@ -185,13 +185,15 @@ public class Exercises1
         string name = sut.ExerciseScalar5();
         
         // Assert
-        name.Should().Be("James Stewart");
+        name.Should().Be("Kevin Spacey");
     }
     
-    // One more exercise with scalar values. Which movie (return title) has the highest average rating?
+    // One more exercise with scalar values.
+    // Which movie (return title) has the highest average rating?
     public string ExerciseScalar6()
     {
-        string sql = @"SELECT Title FROM Movies m JOIN Ratings r ON m.MovieId = r.MovieId
+        string sql = @"SELECT Title FROM Movies m 
+                            JOIN Ratings r ON m.MovieId = r.MovieId
                         GROUP BY Title
                         ORDER BY AVG(Stars) DESC
                         LIMIT 1";
@@ -215,16 +217,18 @@ public class Exercises1
     
     // Now we will start with some simple queries, that return one row with multiple columns.
     // https://www.learndapper.com/dapper-query/selecting-single-rows
-    // There are many methods that can be used to return a single row with multiple columns. The are subtle differences between them!
+    // There are many methods that can be used to return a single row with multiple columns.
+    // The are subtle differences between them!
     // We will not look at the methods that return a dynamic type, because they are not type safe!
-    // We will look at the methods that return a strongly typed object.
+    // We will look at the methods that return a strongly typed object, i.e. use a generic type parameter <T>.
     
     // Write a SQL query to find the first and last name of the actor with ActorId = 101.
     // Use the query method QuerySingle<T> that returns a single row with multiple columns.
+    // In this exercise T is QuerySingleResult1, see below.  
     public class QuerySingleResult1
     {
-        public string Firstname { get; set; } = null!;
-        public string Lastname { get; set; } = null!;
+        public string FirstName { get; set; } = null!;
+        public string LastName { get; set; } = null!;
     }
     
     public QuerySingleResult1 ExercisesQuerySingle()
@@ -245,13 +249,12 @@ public class Exercises1
         var actor = sut.ExercisesQuerySingle();
         
         // Assert
-        actor.Firstname.Should().Be("James");
-        actor.Lastname.Should().Be("Stewart");
+        actor.FirstName.Should().Be("James");
+        actor.LastName.Should().Be("Stewart");
     }
     
-    
     // Write a SQL query to find the first and last name of the director and the year and duration
-    // from movie with name 'American Beauty'.
+    // from the movie with the name 'American Beauty'.
     // Use the query method QuerySingle<T> that returns a single row with multiple columns.
     // Create a class QuerySingleRowResult2 with the properties that are required and of the correct type.
     public class QuerySingleResult2
@@ -264,7 +267,11 @@ public class Exercises1
     
     public QuerySingleResult2 ExercisesQuerySingle2()
     {
-        string sql = @"SELECT d.FirstName, d.LastName, m.Year, m.Duration FROM Directors d JOIN DirectorMovie dm ON d.DirectorId = dm.DirectorsDirectorId JOIN Movies m ON dm.MoviesMovieId = m.MovieId WHERE m.Title = 'American Beauty'";
+        string sql = @"SELECT d.FirstName, d.LastName, m.Year, m.Duration 
+                        FROM Directors d 
+                            JOIN DirectorMovie dm ON d.DirectorId = dm.DirectorsDirectorId 
+                                JOIN Movies m ON dm.MoviesMovieId = m.MovieId 
+                        WHERE m.Title = 'American Beauty'";
         using var connection = new MySqlConnection(GetConnectionString());
         var movie = connection.QuerySingle<QuerySingleResult2>(sql);
         return movie;
@@ -286,8 +293,9 @@ public class Exercises1
         movie.Duration.Should().Be(122);
     }
     
-    // QuerySingle<T> throws an exception if the query returns zero or more than one row.
-    // Let write a query that returns Title, ReleaseDate  for a movie that doesn't exist. The movie with title = 'Does not exist', doesn't exist.
+    // QuerySingle<T>() throws an exception if the query returns zero or more than one row.
+    // Let's write a query that returns Title, ReleaseDate for a movie that doesn't exist.
+    // The movie with title = 'Does not exist', doesn't exist.
     public class QuerySingleResult3
     {
         public string Title { get; set; } = null!;
@@ -312,9 +320,10 @@ public class Exercises1
         Assert.Catch(() => sut.ExerciseQuerySingle3());
     }
     
-    // QuerySingleOrDefault<T> throws an exception if the query returns more than one row.
-    // Use when zero or one row is expected to be returned. Returns an instance of the type specified by the T type parameter or null
-    // Let write a query for a movie that doesn't exist. The movie with title = 'Does not exist', doesn't exist.
+    // QuerySingleOrDefault<T>() throws an exception if the query returns more than one row.
+    // Use when zero or one row is expected to be returned.
+    // Returns an instance of the type specified by the T type parameter or null
+    // Let's write a query for a movie that doesn't exist. The movie with title = 'Does not exist', doesn't exist.
     // Select the Title, Language
     // This returns a null!
     public class QuerySingleOrDefaultResult1
@@ -344,8 +353,10 @@ public class Exercises1
     }
     
     // Sometimes the query returns multiple rows and we only need one row.
-    // QueryFirst<T> returns the first row of the query result. If the query returns no rows, an exception is thrown.
-    // Let write a query that return all movies with the language 'English'. (this is a query that returns multiple rows)
+    // QueryFirst<T> returns the first row of the query result.
+    // If the query returns no rows, an exception is thrown.
+    // Let's write a query that returns all movies with the language 'English'.
+    // (this is a query that returns multiple rows)
     // Select the Title, Language
     // Order the result by Title alphabetically
     public class ExerciseQueryFirst1
@@ -372,7 +383,7 @@ public class Exercises1
         var result = sut.ExerciseQueryFirst();
         
         // Assert
-        result.Title.Should().Be("Aliens"); // good movie :)
+        result.Title.Should().Be("Aliens"); // good movie :-)
         result.Language.Should().Be("English");
     }
     
@@ -403,7 +414,7 @@ public class Exercises1
     
     // It's not a good practice to use an IEnumerable<dynamic> as in the previous exercise. Let's fix that.
     // Write a SQL query to find the name and year of the movies. This time return a list of Movie objects.
-    // Use the correct Dapper method and create a class named ResultExerciseQuery with the properties Title and Year.
+    // Use the correct Dapper method (Query<T>(sql)) and create a class named ResultExerciseQuery with the properties Title and Year.
     // Use the correct types for the properties.
     public class ResultExerciseQuery
     {
@@ -437,8 +448,7 @@ public class Exercises1
         return Verify(movies);
     }
     
-    
-    // Write a SQL query to find all the titles of the movies directed by 'Kevin Spacy'. Return movie titles.
+    // Write a SQL query to find all the titles of the movies directed by 'Kevin Spacey'. Return movie titles.
     // Order the result alphabetically. It's always a good idea to return a List<T> instead of IEnumerable<T> when using Dapper.
     public List<string> ExerciseQuery2()
     {
@@ -446,9 +456,9 @@ public class Exercises1
             """
                  SELECT Title
                  FROM
-                     Movies m JOIN
-                     DirectorMovie dm ON m.MovieId = dm.MoviesMovieId JOIN
-                     Directors d ON dm.DirectorsDirectorId = d.DirectorId
+                     Movies m 
+                         JOIN DirectorMovie dm ON m.MovieId = dm.MoviesMovieId
+                            JOIN Directors d ON dm.DirectorsDirectorId = d.DirectorId
                  WHERE d.FirstName = 'Kevin' AND d.LastName = 'Spacey' ORDER BY Title
             """;
         
@@ -471,8 +481,10 @@ public class Exercises1
     }
     
     
-    // Write a SQL query to get a movie By movieId, return an Movie Object that contains the Title, Year, Duration, Language, ReleaseDate, ReleaseCountryCode.
-    // Use the correct Dapper method. This method should return a single row with multiple columns and throws an exception if the query returns zero or more than one row.
+    // Write a SQL query to get a movie by movieId, return a Movie Object that contains the Title,
+    // Year, Duration, Language, ReleaseDate, ReleaseCountryCode.
+    // Use the correct Dapper method. This method should return a single row with multiple columns
+    // and throws an exception if the query returns zero or more than one row.
     // Create a class named Movie with the properties Title, Year, Duration, Language, ReleaseDate, ReleaseCountryCode.
     public class Movie
     {
@@ -485,7 +497,7 @@ public class Exercises1
     }
 
 
-    public Movie GetMovieById(int movieId )
+    public Movie GetMovieById(int movieId)
     {
         string sql = @"SELECT Title, Year, Duration, Language, ReleaseDate, ReleaseCountryCode
                         FROM Movies WHERE MovieId = @movieId";
@@ -515,8 +527,8 @@ public class Exercises1
         Assert.Catch(() => sut.GetMovieById(999999));
     }
     
-    // Write a SQL query to get a movie By movieId, return an Movie Object that contains the Title, Year, Duration, Language, ReleaseDate, ReleaseCountryCode.
-    // Use the correct Dapper method. This time GetMovieById2() returns a nullable Movie object.
+    // Write a SQL query to get a movie by movieId, return a Movie Object that contains the Title, Year, Duration, Language, ReleaseDate, ReleaseCountryCode.
+    // Use the correct Dapper method. This time GetMovieById2() returns a nullable Movie (Movie?) object.
     // If the movie doesn't exist, return null.
     public Movie? GetMovieById2(int movieId )
     {
