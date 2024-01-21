@@ -80,6 +80,7 @@ public class JsonToCSharp
                            JOIN customersAsJson c on r.customer_id = c.customer_id
                            JOIN inventory  i ON r.inventory_id = i.inventory_id
                            JOIN filmAndActorAsJson f ON i.film_id = f.film_Id
+                  
                   -- WHERE c.customer_id = 19
                   GROUP BY c.customer_id;
                   """;
