@@ -50,9 +50,9 @@ SELECT JSON_MERGE_PATCH(c.CutsomerObject,
                         JSON_OBJECT('movies',
                                     JSON_ARRAYAGG(DISTINCT f.FilmActorAsJson ORDER BY JSON_EXTRACT(f.FilmActorAsJson, '$.Title')) )) as CustomerObject
 FROM rental r
-         JOIN customersAsJson c on r.customer_id = c.customer_id
+     JOIN customersAsJson c on r.customer_id = c.customer_id
          JOIN inventory  i ON r.inventory_id = i.inventory_id
-         JOIN filmAndActorAsJson f ON i.film_id = f.film_Id
+            JOIN filmAndActorAsJson f ON i.film_id = f.film_Id
 WHERE c.customer_id = 19
 GROUP BY c.customer_id;
 

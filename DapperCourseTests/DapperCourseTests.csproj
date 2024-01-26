@@ -21,17 +21,12 @@
           <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
         <PackageReference Include="coverlet.collector" Version="6.0.0"/>
+        <PackageReference Include="ObjectDumper.NET" Version="4.1.15" />
         <PackageReference Include="Verify.NUnit" Version="22.4.1" />
     </ItemGroup>
 
     <ItemGroup>
       <ProjectReference Include="..\DapperCourse\DapperCourse.csproj" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <None Update="Exercise1.Exercises1.verified.txt">
-        <DependentUpon>Exercises.cs</DependentUpon>
-      </None>
     </ItemGroup>
 
 </Project>

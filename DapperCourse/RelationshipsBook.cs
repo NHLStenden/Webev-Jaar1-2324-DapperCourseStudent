@@ -18,8 +18,12 @@ public class RelationshipsBook
     public List<Book> GetBookWithAuthor()
     {
         using var connection = new MySqlConnection(GetConnectionStringForBooks());
-        
-        string sql = "SELECT *  FROM Authors A JOIN Books B on A.Id = B.AuthorId";
+
+        string sql = """
+                     SELECT *  
+                     FROM Authors A 
+                         JOIN Books B on A.Id = B.AuthorId
+                     """;
         var books = connection.Query<Book, Author, Book>(sql, 
             (book, author) =>
             {

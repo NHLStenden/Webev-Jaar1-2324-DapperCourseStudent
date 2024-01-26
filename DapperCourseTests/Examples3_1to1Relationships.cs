@@ -7,13 +7,7 @@ public class Examples3_1to1Relationships
 {
     // https://medium.com/dapper-net/multiple-mapping-d36c637d14fa
     // https://dapper-tutorial.net/querymultiple
-    public class Actor
-    {
-        public int ActorId { get; set; }
-        public string FirstName { get; set; }
-        public string LastName { get; set; }
-        public DateTime LastUpdate { get; set; }
-    }
+
     
     public class Customer
     {
@@ -41,7 +35,7 @@ public class Examples3_1to1Relationships
         public City City { get; set; } = null!;
         public string PostalCode { get; set; } = null!;
         public string Phone { get; set; } = null!;
-        public byte[] Location { get; set; }
+        // public byte[] Location { get; set; }
 
         // public MySqlGeometry LocationAsGeometry
         // {
@@ -62,17 +56,19 @@ public class Examples3_1to1Relationships
     //This query will return all the customers, to load the address we have to execute a query for each customer.
     //Foreach customer we have to execute a query to get the address from the database. This is done in the foreach loop.
     //This is called the N+1 problem, because we have 1 query to get the customers (1 Query) and N queries to get the addresses (foreach loop).
+    //Where N is the number of customers.
     //This approach should be avoided, because it will result in a lot of queries to the database.
-    //Ultimately this will result in a slow application or even a timeout!
+    //Ultimately this will result in a slow application or even a timeouts!
     public List<Customer> GetCustomersWithAddressNPlusOneProblem()
     {
         string sql =
             $"""
              SELECT customer_id AS {nameof(Customer.CustomerId)}, store_id AS {nameof(Customer.StoreId)}, 
-             first_name AS {nameof(Customer.FirstName)}, last_name as {nameof(Customer.LastName)}, 
-             email AS {nameof(Customer.Email)}, address_id AS {nameof(Customer.AddressId)}, 
-             active AS {nameof(Customer.Active)}, create_date AS {nameof(Customer.CreateDate)}, 
-             last_update AS {nameof(Customer.LastUpdate)} FROM customer
+                    first_name AS {nameof(Customer.FirstName)}, last_name as {nameof(Customer.LastName)}, 
+                    email AS {nameof(Customer.Email)}, address_id AS {nameof(Customer.AddressId)}, 
+                    active AS {nameof(Customer.Active)}, create_date AS {nameof(Customer.CreateDate)}, 
+                    last_update AS {nameof(Customer.LastUpdate)} 
+             FROM customer
              ORDER BY customer_id
              LIMIT 3
              """;
@@ -82,12 +78,12 @@ public class Examples3_1to1Relationships
         foreach (var customer in customers) // N Queries
         {
             var sqlAddress = """
-                      SELECT address_id AS AddressId, address AS Address1, address2 AS Address2, district AS District,
+                      SELECT    address_id AS AddressId, address AS Address1, address2 AS Address2, district AS District,
                                 city_id AS CityId, postal_code AS PostalCode, phone AS Phone, 
-                                location AS Location, 
+                                -- location AS Location, 
                                 last_update AS LastUpdate
-                      FROM address WHERE 
-                                       address_id = @AddressId
+                      FROM address 
+                      WHERE address_id = @AddressId
                       """;
             
             //Every time we execute this query, we have to go to the database and get the address.
@@ -140,17 +136,18 @@ public class Examples3_1to1Relationships
     {
         string sql = 
             """
-                SELECT c.customer_id AS CustomerId, c.store_id AS StoreId, c.first_name AS FirstName,
-                c.last_name AS LastName, c.email AS Email, c.address_id AS AddressId, c.active AS Active,
-                c.create_date AS CreateDate, c.last_update AS LastUpdate,
+                SELECT 
+                    c.customer_id AS CustomerId, c.store_id AS StoreId, c.first_name AS FirstName,
+                    c.last_name AS LastName, c.email AS Email, c.address_id AS AddressId, c.active AS Active,
+                    c.create_date AS CreateDate, c.last_update AS LastUpdate,
                 
                 'AddressSplit' AS AddressSplit,
                 
-                a.address_id AS AddressId, a.address AS Address1, a.address2 AS Address2, a.district AS District,
-                a.city_id AS CityId, a.postal_code AS PostalCode, a.phone AS Phone, 
-                a.location AS Location, 
-                a.last_update AS LastUpdate
-                
+                    a.address_id AS AddressId, a.address AS Address1, a.address2 AS Address2, a.district AS District,
+                    a.city_id AS CityId, a.postal_code AS PostalCode, a.phone AS Phone, 
+                    -- a.location AS Location, 
+                    a.last_update AS LastUpdate
+            
                 FROM customer c 
                     JOIN address a on a.address_id = c.address_id
                 
@@ -159,12 +156,13 @@ public class Examples3_1to1Relationships
             """;
         
         using var connection = new MySqlConnection(GetConnectionStringForShop());
-        var customers = connection.Query<Customer, Address, Customer>(sql, 
-            (customer, address) =>
+        IEnumerable<Customer> customers = connection.Query<Customer, Address, Customer>(sql, 
+            map: (customer, address) =>
             {
                 customer.Address = address;
                 return customer;
-            }, splitOn: "AddressSplit");
+            }, 
+            splitOn: "AddressSplit");
         return customers.ToList();
     }
     

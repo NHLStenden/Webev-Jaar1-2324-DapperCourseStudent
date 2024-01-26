@@ -88,7 +88,8 @@ public class JsonToCSharp
         using var connection =
             new MySqlConnection("host=localhost;port=3307;user id=root;password=Test@1234!;database=sakila;");
 
-        var jsonCustomers = connection.Query<string>(sql)
+        var jsonCustomers = connection
+            .Query<string>(sql)
             .Select(jsonCustomer => JsonSerializer.Deserialize<Customer>(jsonCustomer)!)
             .ToList();
         

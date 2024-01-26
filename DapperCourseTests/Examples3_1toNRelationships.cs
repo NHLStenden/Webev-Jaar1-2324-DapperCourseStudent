@@ -352,11 +352,11 @@ public class Examples3_1toNRelationships
             """
             SELECT JSON_OBJECT( 'CountryId', c1.country_id,
                                 'Name', c1.country,
-                               'Cities', JSON_ARRAYAGG(
-                                            JSON_OBJECT('Name', c2.city,
-                                                    'CityId', c2.city_id,
-                                                    'CountryId', c2.country_id
-                                            )))
+                                'Cities', JSON_ARRAYAGG(
+                                                JSON_OBJECT('Name', c2.city,
+                                                        'CityId', c2.city_id,
+                                                        'CountryId', c2.country_id
+                                                )))
             FROM country c1 JOIN city c2 ON c1.country_id = c2.country_id
             GROUP BY c1.country_id, c1.country
             ORDER BY c1.country_id
