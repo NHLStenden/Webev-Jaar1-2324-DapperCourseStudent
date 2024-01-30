@@ -12,16 +12,15 @@ public class Todo
 
 public class TodoDemo
 {
-
-    
-    private static string GetConnectionString()
+    private static readonly string ConnectionString;
+    static TodoDemo()
     {
-        return "Server=localhost;Database=Todo;Uid=root;Pwd=Test@1234!;";
+        ConnectionString = ConnectionStrings.GetConnectionStringMovies();
     }
     
     public static List<Todo> Get()
     {
-        using var connection = new MySqlConnection(GetConnectionString());
+        using var connection = new MySqlConnection(ConnectionString);
         return connection.Query<Todo>("SELECT Id, Name, Completed FROM Todo")
                         .ToList();
     }
@@ -29,19 +28,19 @@ public class TodoDemo
     public static Todo? Get(int id)
     {
         string sql = "SELECT Id, Name, Completed FROM Todo WHERE Id = @Id";
-        using var connection = new MySqlConnection(GetConnectionString());
+        using var connection = new MySqlConnection(ConnectionString);
         return connection.QuerySingleOrDefault<Todo>(sql, new { Id = id });
     }
     
     public static int NumberOfTodos()
     {
-        using var connection = new MySqlConnection(GetConnectionString());
+        using var connection = new MySqlConnection(ConnectionString);
         return connection.ExecuteScalar<int>("SELECT COUNT(*) FROM Todo");
     }
     
     public static int Create(Todo todo)
     {
-        using var connection = new MySqlConnection(GetConnectionString());
+        using var connection = new MySqlConnection(ConnectionString);
         var sql = "INSERT INTO Todo (Name, Completed) VALUES (@Name, @Completed); " +
                   "SELECT LAST_INSERT_ID();";
         var id = connection.ExecuteScalar<int>(sql, todo);
@@ -51,7 +50,7 @@ public class TodoDemo
     public static void Update(Todo todo)
     {
         var sql = "UPDATE Todo SET Name = @Name, Completed = @Completed WHERE Id = @Id";
-        using var connection = new MySqlConnection(GetConnectionString());
+        using var connection = new MySqlConnection(ConnectionString);
         connection.Execute(sql, todo);
     }
     
@@ -60,7 +59,7 @@ public class TodoDemo
         var sql = "UPDATE Todo SET Name = @Name, Completed = @Completed WHERE Id = @Id; "
                   +"SELECT Id, Name, Completed FROM Todo WHERE Id = @Id";
         
-        using var connection = new MySqlConnection(GetConnectionString());
+        using var connection = new MySqlConnection(ConnectionString);
         // var updatedTodo = TodoDemo.Get(todo.Id);
         var updatedTodo = connection.QuerySingle<Todo>(sql);
         return updatedTodo;
@@ -68,7 +67,7 @@ public class TodoDemo
     
     public static void Delete(int id)
     {
-        using var connection = new MySqlConnection(GetConnectionString());
+        using var connection = new MySqlConnection(ConnectionString);
         var sql = "DELETE FROM Todo WHERE Id = @Id";
         connection.Execute(sql, new { Id = id });
     }
