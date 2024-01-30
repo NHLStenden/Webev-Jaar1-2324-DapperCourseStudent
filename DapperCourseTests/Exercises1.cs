@@ -32,17 +32,15 @@ public class Exercises1
     // Rider can help you with this!!! If you type the name of a table or column, it will show you the correct case.
     // Rider can inspect the database schema (structure of database, such as tables, columns, views, etc.)
     // and assist you with writing correct SQL and also the case sensitivity of the table and column names.
-    private string GetConnectionString()
+    private static readonly string ConnectionString;
+    static Exercises1()
     {
-        return "server=localhost;port=3306;database=Movies;user=root;password=Test@1234!";
+        ConnectionString = ConnectionStrings.GetConnectionStringMovies();
     }
     
     public bool Exercise0()
     {
-        using MySqlConnection connection = new MySqlConnection(GetConnectionString());
-        connection.Open();
-        bool result = connection.QuerySingle<bool>("SELECT 1 = 1");
-        return result;
+        throw new ArgumentException();
     }
     
     [Test]
@@ -73,11 +71,7 @@ public class Exercises1
     // because it returns a strongly typed value!
     public int ExerciseScalar1()
     {
-        string sql = "SELECT COUNT(*) FROM Movies";
-        
-        using MySqlConnection connection = new MySqlConnection(GetConnectionString());
-        object? count = connection.ExecuteScalar(sql);
-        return Convert.ToInt32(count);
+        throw new ArgumentException();
     }
     
     [Test]
@@ -98,10 +92,7 @@ public class Exercises1
     // A method that returns a strongly typed value is always better than a method that returns a dynamic type!
     public int ExerciseScalar2()
     {
-        string sql = "SELECT COUNT(*) FROM Actors WHERE Gender = 'F' ";
-        using MySqlConnection connection = new MySqlConnection(GetConnectionString());
-        int count = connection.ExecuteScalar<int>(sql);
-        return count;
+        throw new ArgumentException();
     }
     
     [Test]
@@ -123,10 +114,7 @@ public class Exercises1
     // Write a SQL query to find out.
     public bool ExerciseScalar3()
     {
-        string sql = "SELECT COUNT(*) > 0 FROM Reviewers WHERE Name IS NULL OR Name = ''";
-        using MySqlConnection connection = new MySqlConnection(GetConnectionString());
-        bool count = connection.ExecuteScalar<bool>(sql);
-        return count;
+        throw new ArgumentException();
     }
     
     [Test]
@@ -145,10 +133,7 @@ public class Exercises1
     // Write a SQL query to find the number of movies that have a rating higher (stars) than 8.5.
     public int ExerciseScalar4()
     {
-        string sql = "SELECT COUNT(*) FROM Ratings WHERE Stars > 8.5";
-        using MySqlConnection connection = new MySqlConnection(GetConnectionString());
-        int count = connection.ExecuteScalar<int>(sql);
-        return count;
+        throw new ArgumentException();
     }
     
     [Test]
@@ -168,11 +153,7 @@ public class Exercises1
     // To concatenate strings in MySql use the CONCAT function.
     public string ExerciseScalar5()
     {
-        string sql = @"SELECT CONCAT(FirstName, ' ', LastName) FROM Actors WHERE ActorId = 
-                            (SELECT ActorId FROM MovieCasts GROUP BY ActorId ORDER BY COUNT(*) DESC LIMIT 1)";
-        using MySqlConnection connection = new MySqlConnection(GetConnectionString());
-        string? name = connection.ExecuteScalar<string>(sql);
-        return name;
+        throw new ArgumentException();
     }
     
     [Test]
@@ -192,14 +173,7 @@ public class Exercises1
     // Which movie (return title) has the highest average rating?
     public string ExerciseScalar6()
     {
-        string sql = @"SELECT Title FROM Movies m 
-                            JOIN Ratings r ON m.MovieId = r.MovieId
-                        GROUP BY Title
-                        ORDER BY AVG(Stars) DESC
-                        LIMIT 1";
-        using MySqlConnection connection = new MySqlConnection(GetConnectionString());
-        string? title = connection.ExecuteScalar<string>(sql);
-        return title;
+        throw new ArgumentException();
     }
     
     [Test]
@@ -233,10 +207,7 @@ public class Exercises1
     
     public QuerySingleResult1 ExercisesQuerySingle()
     {
-        string sql = "SELECT FirstName, LastName FROM Actors WHERE ActorId = 101";
-        using MySqlConnection connection = new MySqlConnection(GetConnectionString());
-        QuerySingleResult1 actor = connection.QuerySingle<QuerySingleResult1>(sql);
-        return actor;
+        throw new ArgumentException();
     }
     
     [Test]
@@ -267,14 +238,7 @@ public class Exercises1
     
     public QuerySingleResult2 ExercisesQuerySingle2()
     {
-        string sql = @"SELECT d.FirstName, d.LastName, m.Year, m.Duration 
-                        FROM Directors d 
-                            JOIN DirectorMovie dm ON d.DirectorId = dm.DirectorsDirectorId 
-                                JOIN Movies m ON dm.MoviesMovieId = m.MovieId 
-                        WHERE m.Title = 'American Beauty'";
-        using MySqlConnection connection = new MySqlConnection(GetConnectionString());
-        QuerySingleResult2 movie = connection.QuerySingle<QuerySingleResult2>(sql);
-        return movie;
+        throw new ArgumentException();
     }
     
     [Test]
@@ -304,10 +268,7 @@ public class Exercises1
     
     public QuerySingleResult3 ExerciseQuerySingle3()
     {
-        string sql = "SELECT Title FROM Movies WHERE Title = 'Does not exist'";
-        using MySqlConnection connection = new MySqlConnection(GetConnectionString());
-        QuerySingleResult3 result = connection.QuerySingle<QuerySingleResult3>(sql);
-        return result;
+        throw new ArgumentException();
     }
     
     [Test]
@@ -333,10 +294,7 @@ public class Exercises1
     }
     public QuerySingleOrDefaultResult1 ExerciseQuerySingleOrDefault1()
     {
-        string sql = "SELECT Title FROM Movies WHERE Title = 'Does not exist'";
-        using MySqlConnection connection = new MySqlConnection(GetConnectionString());
-        QuerySingleOrDefaultResult1? result = connection.QuerySingleOrDefault<QuerySingleOrDefaultResult1>(sql);
-        return result;
+        throw new ArgumentException();
     }
     
     [Test]
@@ -367,10 +325,7 @@ public class Exercises1
     
     public ExerciseQueryFirst1 ExerciseQueryFirst()
     {
-        string sql = "SELECT Title, Language FROM Movies WHERE Language = 'English' ORDER BY Title";
-        using MySqlConnection connection = new MySqlConnection(GetConnectionString());
-        ExerciseQueryFirst1 result = connection.QueryFirst<ExerciseQueryFirst1>(sql);
-        return result;
+        throw new ArgumentException();
     }
     
     [Test]
@@ -392,9 +347,7 @@ public class Exercises1
     // Don't worry about the return type, we will fix that in the next exercise.
     public IEnumerable<dynamic> ExerciseQueryDynamic()
     {
-        using MySqlConnection connection = new MySqlConnection(GetConnectionString());
-        IEnumerable<dynamic> movies = connection.Query("SELECT Title, Year FROM Movies ORDER BY Title LIMIT 10");
-        return movies;
+        throw new ArgumentException();
     }
     
     [Test]
@@ -424,13 +377,7 @@ public class Exercises1
     
     public IEnumerable<ResultExerciseQuery> ExerciseQuery()
     {
-        string sql = """
-                         SELECT Title, Year FROM Movies ORDER BY Title LIMIT 10
-                     """;
-            
-        using MySqlConnection connection = new MySqlConnection(GetConnectionString());
-        IEnumerable<ResultExerciseQuery> movies = connection.Query<ResultExerciseQuery>(sql);
-        return movies;
+        throw new ArgumentException();
     }
     
     [Test]
@@ -452,19 +399,7 @@ public class Exercises1
     // Order the result alphabetically. It's always a good idea to return a List<T> instead of IEnumerable<T> when using Dapper.
     public List<string> ExerciseQuery2()
     {
-        string sql = 
-            """
-                 SELECT Title
-                 FROM
-                     Movies m 
-                         JOIN DirectorMovie dm ON m.MovieId = dm.MoviesMovieId
-                            JOIN Directors d ON dm.DirectorsDirectorId = d.DirectorId
-                 WHERE d.FirstName = 'Kevin' AND d.LastName = 'Spacey' ORDER BY Title
-            """;
-        
-        using MySqlConnection connection = new MySqlConnection(GetConnectionString());
-        List<string> titles = connection.Query<string>(sql).ToList();
-        return titles;
+        throw new ArgumentException();
     }
     
     [Test]
@@ -499,12 +434,7 @@ public class Exercises1
 
     public Movie GetMovieById(int movieId)
     {
-        string sql = @"SELECT Title, Year, Duration, Language, ReleaseDate, ReleaseCountryCode
-                        FROM Movies WHERE MovieId = @movieId";
-        
-        using MySqlConnection connection = new MySqlConnection(GetConnectionString());
-        Movie movies = connection.QuerySingle<Movie>(sql, new { movieId });
-        return movies;
+        throw new ArgumentException();
     }
     
     [Test]
@@ -532,12 +462,7 @@ public class Exercises1
     // If the movie doesn't exist, return null.
     public Movie? GetMovieById2(int movieId )
     {
-        string sql = @"SELECT Title, Year, Duration, Language, ReleaseDate, ReleaseCountryCode
-                        FROM Movies WHERE MovieId = @movieId";
-        
-        using MySqlConnection connection = new MySqlConnection(GetConnectionString());
-        Movie? movies = connection.QuerySingleOrDefault<Movie>(sql, new { movieId });
-        return movies;
+        throw new ArgumentException();
     }
     
     [Test]

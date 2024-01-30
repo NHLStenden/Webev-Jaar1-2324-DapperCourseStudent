@@ -9,22 +9,22 @@ public class Exercises2
     // Database installation
     // For the exercises below, use the sakila database, this database can be downloaded from:
     // https://dev.mysql.com/doc/index-other.html
-    // unzip the sakila-db.zip file and import the sakila-schema.sql and sakila-data.sql files into your mysql database
-    // https://dev.mysql.com/doc/sakila/en/sakila-installation.html
-    // take a look a the database schema, you can use a tool like MySQL Workbench for this (or Rider)
+    // The files are also available in the SQL folder of this project.
+    // Take a look a the database schema, you can use a tool like MySQL Workbench for this (or Rider)
     // it's a movie rental database, it contains tables like:
     // actor, address, category, city, country, customer, film, film_actor, film_category, inventory, language, payment, rental, staff, store
     // the structure (database diagram) can be found here:
     // https://dev.mysql.com/doc/sakila/en/sakila-structure.html (the direction of the arrows is incorrect!)
-    private static string GetConnectionString()
+    private static readonly string ConnectionString;
+    static Exercises2()
     {
-        return "Server=localhost;port=3306;Database=sakila;Uid=root;Pwd=Test@1234!";
+        ConnectionString = ConnectionStrings.GetConnectionStringSakila();
     }
     
     [Test]
     public void TestDatabaseIsCreatedAndFilled()
     {
-        using MySqlConnection connection = new MySqlConnection(GetConnectionString());
+        using MySqlConnection connection = new MySqlConnection(ConnectionString);
         string sql = """SELECT COUNT(*) FROM nicer_but_slower_film_list""";
         int count = connection.ExecuteScalar<int>(sql);
         count.Should().Be(1000);
@@ -48,20 +48,14 @@ public class Exercises2
     
     public List<CustomerForSqlInjection> GetCustomerByEmail(string email)
     {
-        using MySqlConnection connection = new MySqlConnection(GetConnectionString());
-        string sql = $"""
-                       SELECT customer_id as CustomerId, first_name as FirstName, last_name as LastName, email as Email
-                       FROM customer WHERE email = '{email}'
-                      """;
-        IEnumerable<CustomerForSqlInjection> customer = connection.Query<CustomerForSqlInjection>(sql);
-        return customer.ToList();
+        throw new NotImplementedException();
     }
     
     [Test]
     public void SqlInjectionTest()
     {
         string email = "PATRICIA.JOHNSON@sakilacustomer.org";
-        using MySqlConnection connection = new MySqlConnection(GetConnectionString());
+        using MySqlConnection connection = new MySqlConnection(ConnectionString);
         
         GetCustomerByEmail(email).Should().HaveCount(1);
 
@@ -73,20 +67,14 @@ public class Exercises2
     //Always use SQL Parameter Placeholders!!!!!
     public List<CustomerForSqlInjection> GetCustomerByEmail2(string email)
     {
-        using MySqlConnection connection = new MySqlConnection(GetConnectionString());
-        string sql = $"""
-                       SELECT customer_id as CustomerId, first_name as FirstName, last_name as LastName, email as Email
-                       FROM customer WHERE email = @email
-                      """;
-        IEnumerable<CustomerForSqlInjection> customer = connection.Query<CustomerForSqlInjection>(sql, new {email});
-        return customer.ToList();
+        throw new NotImplementedException();
     }
     
     [Test]
     public void SqlInjectionPreventionTest()
     {
         string email = "PATRICIA.JOHNSON@sakilacustomer.org";
-        using MySqlConnection connection = new MySqlConnection(GetConnectionString());
+        using MySqlConnection connection = new MySqlConnection(ConnectionString);
         
         GetCustomerByEmail(email).Should().HaveCount(1);
 
@@ -98,7 +86,6 @@ public class Exercises2
     //Create a view that retrieves all the columns from the tables: rental, customer, inventory, film
     //In other words join the tables rental, customer, inventory, film
     //Create a view called rental_view
-
     public class RentalView
     {
         public int RentalId { get; set; }
@@ -133,31 +120,7 @@ public class Exercises2
     
     public List<RentalView> ViewExercises1()
     {
-        using MySqlConnection connection = new MySqlConnection(GetConnectionString());
-        string sql = """
-                      DROP VIEW IF EXISTS rental_view;
-                      CREATE VIEW rental_view AS
-                      SELECT r.rental_id as RentalId, r.rental_date as RentalDate, r.inventory_id as InventoryId,
-                      r.customer_id as CustomerId, r.return_date as ReturnDate,
-                          r.staff_id as StaffId, r.last_update as RentalLastUpdate,
-                             c.first_name as FirstName, c.last_name as LastName, c.email as Email, c.address_id as AddressId,
-                             c.active as Active, c.create_date as CreateDate,
-                             i.film_id as FilmId, i.store_id as StoreId, i.last_update as InventoryLastUpdate,
-                             f.title as Title, f.description as Description, f.release_year as ReleaseYear, f.language_id as LanguageId,
-                             f.original_language_id as OriginalLanguageId, f.rental_duration as RentalDuration,
-                             f.rental_rate as RentalRate,
-                             f.length as Length , f.replacement_cost as ReplacementCost,
-                             f.rating as Rating, f.special_features as SpecialFeatures,
-                             f.last_update as FilmLastUpdate
-                      FROM rental r
-                          JOIN customer c ON r.customer_id = c.customer_id
-                              JOIN inventory i ON r.inventory_id = i.inventory_id
-                                  JOIN film f ON i.film_id = f.film_id
-                     """;
-        connection.Execute(sql);
-
-
-        return connection.Query<RentalView>("SELECT * FROM rental_view").ToList();
+        throw new NotImplementedException();
     }
     
     [Test]
@@ -191,13 +154,7 @@ public class Exercises2
     
     public List<TopRentalCustomers> ViewExercises2()
     {
-        string sql = """
-                     SELECT CustomerId, LastName, FirstName, COUNT(*) as AmountOfRentals
-                     FROM rental_view GROUP BY CustomerId ORDER BY AmountOfRentals DESC LIMIT 10
-                     """;
-        using MySqlConnection connection = new MySqlConnection(GetConnectionString());
-        IEnumerable<TopRentalCustomers> result = connection.Query<TopRentalCustomers>(sql);
-        return result.ToList();
+        throw new NotImplementedException();
     }
     
     [Test]
@@ -235,19 +192,7 @@ public class Exercises2
 
     public List<RentalByCountry> ViewExercises3()
     {
-        string sql = """
-                        SELECT c.country as CountryName, COUNT(*) as AmountOfRentalsByCountry  
-                        FROM rental_view
-                            JOIN address a ON rental_view.AddressId = a.address_id
-                                JOIN city ci ON a.city_id = ci.city_id
-                                    JOIN country c ON ci.country_id = c.country_id
-                            GROUP BY c.country
-                            ORDER BY COUNT(*) DESC
-                            LIMIT 10
-                     """;
-        using MySqlConnection connection = new MySqlConnection(GetConnectionString());
-        List<RentalByCountry> result = connection.Query<RentalByCountry>(sql).ToList();
-        return result;
+        throw new NotImplementedException();
     }
     
     [Test]
@@ -285,33 +230,7 @@ public class Exercises2
     //Enough about abstraction, let's create the customer_view and use it to reproduce the query from the previous exercise.
     public List<RentalByCountry> ViewExercises4()
     {
-        string createCustomerView =
-            """
-                DROP VIEW IF EXISTS customer_view;
-
-                CREATE VIEW customer_view AS
-                SELECT c.customer_id, c.first_name, c.last_name, c.email, a.address, a.address2, 
-                        c.address_id,
-                        a.district, a.postal_code, a.phone, ci.city, co.country
-                FROM customer c
-                     JOIN address a ON c.address_id = a.address_id
-                        JOIN city ci ON a.city_id = ci.city_id
-                            JOIN country co ON ci.country_id = co.country_id;
-            """;
-        
-        using MySqlConnection connection = new MySqlConnection(GetConnectionString());
-        connection.Execute(createCustomerView);
-        
-        string sql = """
-                        SELECT c.country as CountryName, COUNT(*) as AmountOfRentalsByCountry
-                        FROM rental_view
-                              JOIN customer_view c ON rental_view.CustomerId = c.customer_id
-                        GROUP BY c.country
-                        ORDER BY AmountOfRentalsByCountry DESC
-                        LIMIT 10
-                     """;
-        List<RentalByCountry> result = connection.Query<RentalByCountry>(sql).ToList();
-        return result;
+        throw new NotImplementedException();
     }
     
     [Test]
@@ -354,21 +273,7 @@ public class Exercises2
     
     public List<CustomerSearch> ExerciseParameter1(string city)
     {
-        string sql =
-            """
-                SELECT c.customer_id AS CustomerId, c.last_name AS LastName, c.first_name AS FirstName, c.email AS Email
-                FROM customer c
-                    JOIN address a on c.address_id = a.address_id
-                        JOIN city ci on a.city_id = ci.city_id WHERE ci.city = @city
-                ORDER BY c.last_name, c.first_name
-                LIMIT 10
-            """;
-        
-        using MySqlConnection connection = new MySqlConnection(GetConnectionString());
-        List<CustomerSearch> result = connection.Query<CustomerSearch>(sql, 
-            new {city}).ToList();
-
-        return result;
+        throw new NotImplementedException();
     }
 
     [Test]
@@ -399,22 +304,7 @@ public class Exercises2
     //So the query is the same as the previous exercise, but the parameter is optional
     public List<CustomerSearch> ExerciseParameter2(string? city = null)
     {
-        string sql =
-            """
-                SELECT c.customer_id as CustomerId, c.last_name as LastName, c.first_name as FirstName, c.email as Email
-                FROM customer c
-                    JOIN address a on c.address_id = a.address_id
-                        JOIN city ci on a.city_id = ci.city_id 
-                WHERE (@City IS NULL OR ci.city = @City)
-                ORDER BY c.last_name, c.first_name
-                LIMIT 10
-            """;
-        
-        using MySqlConnection connection = new MySqlConnection(GetConnectionString());
-        List<CustomerSearch> result = connection.Query<CustomerSearch>(sql, 
-            new {City = city}).ToList();
-
-        return result;
+        throw new NotImplementedException();
     }
     
     [Test]
@@ -450,24 +340,7 @@ public class Exercises2
     
     public List<CustomerSearch> ExerciseParameter3(string? country = null, string? city = null)
     {
-        string sql =
-            """
-                SELECT c.customer_id as CustomerId, c.last_name as LastName, c.first_name as FirstName, c.email as Email
-                FROM customer c
-                    JOIN sakila.address a on c.address_id = a.address_id
-                        JOIN sakila.city ci on a.city_id = ci.city_id
-                            JOIN sakila.country co on ci.country_id = co.country_id
-                WHERE (@City IS NULL OR ci.city = @City) 
-                  AND (@Country IS NULL OR co.country = @Country)
-                ORDER BY c.last_name, c.first_name
-                LIMIT 10
-            """;
-        
-        using MySqlConnection connection = new MySqlConnection(GetConnectionString());
-        List<CustomerSearch> result = connection.Query<CustomerSearch>(sql, 
-            new {City = city, Country = country}).ToList();
-
-        return result;
+        throw new NotImplementedException();
     }
 
     [Test]
@@ -533,28 +406,11 @@ public class Exercises2
     
     public List<CustomerSearch> ExerciseParameter4(CustomerSearchParameters customerSearchParameters)
     {
-        string sql =
-            """
-                SELECT c.customer_id as CustomerId, c.last_name as LastName, c.first_name as FirstName, c.email as Email
-                FROM customer c
-                    JOIN address a on c.address_id = a.address_id
-                        JOIN city ci on a.city_id = ci.city_id
-                            JOIN country co on ci.country_id = co.country_id
-                WHERE (@City IS NULL OR ci.city = @City) AND (@Country IS NULL OR co.country = @Country)
-                ORDER BY c.last_name, c.first_name
-                LIMIT @PageSize OFFSET @Offset
-            """;
-        
-        using MySqlConnection connection = new MySqlConnection(GetConnectionString());
-        List<CustomerSearch> result = connection.Query<CustomerSearch>(sql, 
-                customerSearchParameters
-            ).ToList();
-
-        return result;
+        throw new NotImplementedException();
     }
 
     [Test]
-    public void ExerciseParameter4Test()
+    public async Task ExerciseParameter4Test()
     {
         // Arrange
         Exercises2 sut = new Exercises2();
@@ -569,11 +425,10 @@ public class Exercises2
 
         // Assert
         result.Should().HaveCount(10);
+        
+        result.First().Email.Should().Be("BEATRICE.ARNOLD@sakilacustomer.org");
 
-        result.First().CustomerId.Should().Be(252);
-        result.First().LastName.Should().Be("HOFFMAN");
-
-        result.Last().CustomerId.Should().Be(512);
+        result.Last().Email.Should().Be("BRETT.CORNWELL@sakilacustomer.org");
 
         CustomerSearchParameters customerSearchParameters2 = new CustomerSearchParameters()
         {
@@ -582,8 +437,8 @@ public class Exercises2
         
         // Act
         List<CustomerSearch> result2 = sut.ExerciseParameter4(customerSearchParameters2);
-        
-        //TODO: fix test
+
+        await Verify(result2);
     }
     
     
@@ -633,27 +488,7 @@ public class Exercises2
     
     public int InsertCustomerCopy(InsertCustomerParameters insertCustomerParameters)
     {
-        string sql =
-            """
-                DROP TABLE IF EXISTS customer_copy;
-                CREATE TABLE customer_copy as SELECT * FROM customer LIMIT 0;
-                alter table customer_copy
-                    add constraint customer_copy_pk
-                        primary key (customer_id);
-                alter table customer_copy MODIFY COLUMN customer_id INT AUTO_INCREMENT; 
-            """;
-        
-        using MySqlConnection connection = new MySqlConnection(GetConnectionString());
-        connection.Execute(sql);
-
-        string insertSql =
-            """
-                INSERT INTO customer_copy (store_id, first_name, last_name, email, address_id, active, create_date, last_update)
-                VALUES (@StoreId, @FirstName, @LastName, @Email, @AddressId, @Active, @CreateDate, @LastUpdate);
-                SELECT LAST_INSERT_ID();
-            """;
-        int lastInsertedId = connection.ExecuteScalar<int>(insertSql, insertCustomerParameters);
-        return lastInsertedId;
+        throw new NotImplementedException();
     }
 
     [Test]
@@ -680,7 +515,7 @@ public class Exercises2
         // Assert
         result.Should().Be(1);
         
-        using MySqlConnection connection = new MySqlConnection(GetConnectionString());
+        using MySqlConnection connection = new MySqlConnection(ConnectionString);
         string sql = """
                      SELECT customer_id as CustomerId, store_id as StoreId, first_name as FirstName, last_name as LastName,
                        email as Email, address_id as AddressId, active as Active, create_date as CreateDate, last_update as LastUpdate
@@ -718,43 +553,7 @@ public class Exercises2
 
     public int InsertCityExercises(InsertCountry country, InsertCity insertCity)
     {
-        string sqlCreateCopyTables = """
-                                     DROP TABLE IF EXISTS city_copy;
-                                        DROP TABLE IF EXISTS country_copy;
-                                        CREATE TABLE country_copy as SELECT * FROM country LIMIT 0;
-                                        alter table country_copy
-                                            add constraint country_copy_pk
-                                                primary key (country_id);
-                                        alter table country_copy MODIFY COLUMN country_id INT AUTO_INCREMENT;
-                                        CREATE TABLE city_copy as SELECT * FROM city LIMIT 0;
-                                        alter table city_copy
-                                            add constraint city_copy_pk
-                                                primary key (city_id);
-                                        alter table city_copy MODIFY COLUMN city_id INT AUTO_INCREMENT;
-                                     """;
-        using MySqlConnection connection = new MySqlConnection(GetConnectionString());
-        connection.Execute(sqlCreateCopyTables);
-        
-        
-        string countryExistsSql = "SELECT country_id FROM country_copy WHERE country = @Country";
-        
-        int? countryId = connection.QuerySingleOrDefault<int?>(countryExistsSql, country);
-        if (!countryId.HasValue)
-        {
-            string sqlInsertCountry = """
-                                      INSERT INTO country_copy (country, last_update) VALUES (@Country, @LastUpdate);
-                                        SELECT LAST_INSERT_ID();
-                                      """;
-            
-            countryId = connection.ExecuteScalar<int>(sqlInsertCountry, country);
-        }
-        
-        string sqlInsertCity = """
-                                INSERT INTO city_copy (city, country_id, last_update) VALUES (@City, @CountryId, @LastUpdate);
-                                SELECT LAST_INSERT_ID();
-                               """;
-        int cityId = connection.ExecuteScalar<int>(sqlInsertCity, new {City = insertCity.City, CountryId = countryId, insertCity.LastUpdate});
-        return cityId;
+        throw new NotImplementedException();
     }
 
     [Test]
@@ -762,8 +561,7 @@ public class Exercises2
     {
         // Arrange
         Exercises2 sut = new Exercises2();
-
-
+        
         DateTime lastUpdated = DateTime.Now;
         InsertCountry country = new InsertCountry()
         {
@@ -783,7 +581,7 @@ public class Exercises2
         // Assert
         result.Should().Be(1);
         
-        using MySqlConnection connection = new MySqlConnection(GetConnectionString());
+        using MySqlConnection connection = new MySqlConnection(ConnectionString);
         string sql = """
                      SELECT city_id as CityId, city as City, country_id as CountryId, last_update as LastUpdate
                          FROM city_copy
