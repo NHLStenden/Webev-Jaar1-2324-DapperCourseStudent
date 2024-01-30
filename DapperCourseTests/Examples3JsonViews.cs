@@ -35,7 +35,7 @@ public class Examples3JsonViews
         string sql =
             """
             SELECT JSON_MERGE_PATCH(c.CutsomerObject,
-                                    JSON_OBJECT('movies',
+                                    JSON_OBJECT('Movies',
                                                 JSON_ARRAYAGG(f.FilmActorAsJson) 
                                                 )
                                     ) as CustomerObject
@@ -74,28 +74,28 @@ public class Examples3JsonViews
 
     public class Address
     {
-        public City city { get; set; }
-        public string phone { get; set; }
-        public int cityId { get; set; }
-        public string address { get; set; }
-        public string address2 { get; set; }
-        public string district { get; set; }
-        public string postalCode { get; set; }
+        public City City { get; set; }
+        public string Phone { get; set; }
+        public int CityId { get; set; }
+        public string Address1 { get; set; }
+        public string Address2 { get; set; }
+        public string District { get; set; }
+        public string PostalCode { get; set; }
     }
 
     public class City
     {
-        public string city { get; set; }
-        public int cityId { get; set; }
-        public Country country { get; set; }
-        public int countryId { get; set; }
+        public string Name { get; set; }
+        public int CityId { get; set; }
+        public Country Country { get; set; }
+        public int CountryId { get; set; }
     }
 
     public class Country
     {
-        public string country { get; set; }
-        public int countryId { get; set; }
-        public string lastUpdate { get; set; }
+        public string Name { get; set; }
+        public int CountryId { get; set; }
+        public string LastUpdate { get; set; }
     }
 
     public class Movie
@@ -110,7 +110,7 @@ public class Examples3JsonViews
     {
         public string Email { get; set; }
         public int Active { get; set; }
-        public List<Movie> movies { get; set; }
+        public List<Movie> Movies { get; set; }
         public Address Address { get; set; }
         public int StoreId { get; set; }
         public string LastName { get; set; }
@@ -120,4 +120,5 @@ public class Examples3JsonViews
         public int CustomerId { get; set; }
         public string LastUpdate { get; set; }
     }
+
 }

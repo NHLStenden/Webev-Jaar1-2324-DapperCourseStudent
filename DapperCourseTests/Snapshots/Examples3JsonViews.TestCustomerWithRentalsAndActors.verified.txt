@@ -2,7 +2,7 @@
   {
     Email: RUTH.MARTINEZ@sakilacustomer.org,
     Active: 1,
-    movies: [
+    Movies: [
       {
         Title: ROMAN PUNK,
         Actors: [
@@ -818,22 +818,22 @@
       }
     ],
     Address: {
-      city: {
-        city: Kimberley,
-        cityId: 267,
-        country: {
-          country: South Africa,
-          countryId: 85,
-          lastUpdate: 2006-02-15 04:44:00.000000
+      City: {
+        Name: Kimberley,
+        CityId: 267,
+        Country: {
+          Name: South Africa,
+          CountryId: 85,
+          LastUpdate: 2006-02-15 04:44:00.000000
         },
-        countryId: 85
+        CountryId: 85
       },
-      phone: 272572357893,
-      cityId: 267,
-      address: 1417 Lancaster Avenue,
-      address2: ,
-      district: Northern Cape,
-      postalCode: 72192
+      Phone: 272572357893,
+      CityId: 267,
+      Address1: 1417 Lancaster Avenue,
+      Address2: ,
+      District: Northern Cape,
+      PostalCode: 72192
     },
     StoreId: 1,
     LastName: MARTINEZ,

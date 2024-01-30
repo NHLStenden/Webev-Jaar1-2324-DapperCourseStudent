@@ -27,19 +27,19 @@ SELECT c.customer_id, c.store_id, a.address_id, JSON_OBJECT('CustomerId', c.cust
                                                             'Active', c.active,
                                                             'CreateDate', c.create_date,
                                                             'LastUpdate', c.last_update,
-                                                            'Address', JSON_OBJECT('address', a.address,
-                                                                                   'address2', a.address2,
-                                                                                   'district', a.district,
-                                                                                   'cityId', a.city_id,
-                                                                                   'city', JSON_OBJECT('cityId', ci.city_id,
-                                                                                                       'city', ci.city,
-                                                                                                       'countryId', ci.country_id,
-                                                                                                       'country', JSON_OBJECT('countryId', co.country_id,
-                                                                                                                              'country', co.country,
-                                                                                                                              'lastUpdate', co.last_update)
+                                                            'Address', JSON_OBJECT('Address1', a.address,
+                                                                                   'Address2', a.address2,
+                                                                                   'District', a.district,
+                                                                                   'CityId', a.city_id,
+                                                                                   'City', JSON_OBJECT('CityId', ci.city_id,
+                                                                                                       'Name', ci.city,
+                                                                                                       'CountryId', ci.country_id,
+                                                                                                       'Country', JSON_OBJECT('CountryId', co.country_id,
+                                                                                                                              'Name', co.country,
+                                                                                                                              'LastUpdate', co.last_update)
                                                                                            ),
-                                                                                   'postalCode', a.postal_code,
-                                                                                   'phone', a.phone)
+                                                                                   'PostalCode', a.postal_code,
+                                                                                   'Phone', a.phone)
                                                 ) as CutsomerObject
 FROM customer c
         JOIN address a ON c.address_id = a.address_id

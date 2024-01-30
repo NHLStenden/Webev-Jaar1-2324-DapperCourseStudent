@@ -404,7 +404,7 @@ public class Examples2
         
         // Act -- with two parameters
         List<FilmListSlower> actionFilmsPg13 = sut.GetFilmListSlowerWithCategoryParameterAndRatingOptionalParameter("Action", "PG-13");
-        allFilms.Should().HaveCount(11);
+        actionFilmsPg13.Should().HaveCount(11);
     }
     
     //In this example we use the nameof operator to get the name of the property (nameof(FilmListSlower.FilmId))
@@ -473,7 +473,7 @@ public class Examples2
         
         // Act
         List<FilmListSlower> filmsPage3 = sut.GetFilmListSlowerWithPagingAndSorting(page: 2, sortColumn: "title");
-        filmsPage2.Should().HaveCount(10);
+        filmsPage3.Should().HaveCount(10);
     }
     
     public class PageAndSortParameters
@@ -526,7 +526,7 @@ public class Examples2
         
         // Act
         List<FilmListSlower> filmsPage3 = sut.GetFilmsWithPagingAndSorting(new PageAndSortParameters() {Page = 2, SortColumn = "title"});
-        filmsPage2.Should().HaveCount(10);
+        filmsPage3.Should().HaveCount(10);
     }
 
 
