@@ -3,7 +3,7 @@ using MySqlConnector;
 
 namespace DapperCourse;
 
-public class RelationshipsShop
+public class Examples3RelationshipsShop
 {
     public class Product
     {

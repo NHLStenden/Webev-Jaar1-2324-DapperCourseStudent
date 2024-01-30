@@ -2,15 +2,33 @@ using Dapper;
 using Dapper.Mapper;
 using MySqlConnector;
 
-namespace DapperCourse;
+namespace DapperCourseTests;
 
-public class RelationshipsBook
+public class Examples3_RelationshipsBooks
 {
-
-    
     public string GetConnectionStringForBooks()
     {
         return "Server=localhost;port=3306;Database=Books;Uid=root;Pwd=Test@1234!";
+    }
+    
+    // https://www.infoworld.com/article/3705055/how-to-map-object-relationships-using-dapper-in-aspnet-core.html
+    
+    public class Author
+    {
+        public int Id { get; set; }
+        public string FirstName { get; set; } 
+        public string LastName { get; set; }
+
+        public List<Book> Books { get; set; }
+    }
+
+    public class Book
+    {
+        public int Id { get; set; }
+        public int AuthorId { get; set; }
+        public string Title { get; set; }
+    
+        public Author Author { get; set; }
     }
 
 
@@ -20,8 +38,8 @@ public class RelationshipsBook
         using var connection = new MySqlConnection(GetConnectionStringForBooks());
 
         string sql = """
-                     SELECT *  
-                     FROM Authors A 
+                     SELECT *
+                     FROM Authors A
                          JOIN Books B on A.Id = B.AuthorId
                      """;
         var books = connection.Query<Book, Author, Book>(sql, 
@@ -69,5 +87,4 @@ public class RelationshipsBook
         
         return authors;
     }
-
 }

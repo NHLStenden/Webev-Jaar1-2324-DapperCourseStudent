@@ -3,7 +3,7 @@ using MySqlConnector;
 
 namespace DapperCourse;
 
-public class RelationshipsSakila
+public class Examples3_RelationshipsSakila
 {
     // https://medium.com/dapper-net/multiple-mapping-d36c637d14fa
     // https://dapper-tutorial.net/querymultiple
