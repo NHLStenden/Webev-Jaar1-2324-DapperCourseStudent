@@ -1,7 +1,7 @@
 using Dapper;
 using MySqlConnector;
 
-namespace DapperCourse.LesExamples;
+namespace DapperCourseTests.LesExamples;
 
 public class Todo
 {
@@ -12,6 +12,8 @@ public class Todo
 
 public class TodoDemo
 {
+
+    
     private static string GetConnectionString()
     {
         return "Server=localhost;Database=Todo;Uid=root;Pwd=Test@1234!;";
