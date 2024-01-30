@@ -1,9 +1,9 @@
 using Dapper;
 using MySqlConnector;
 
-namespace DapperCourse;
+namespace DapperCourseTests;
 
-public class Examples3_RelationshipsSakila
+public class Examples3RelationshipsSakila
 {
     // https://medium.com/dapper-net/multiple-mapping-d36c637d14fa
     // https://dapper-tutorial.net/querymultiple
@@ -27,8 +27,8 @@ public class Examples3_RelationshipsSakila
              SELECT actor_id AS {nameof(Actor.ActorId)}, first_name AS {nameof(Actor.FirstName)}, 
              last_name as {nameof(Actor.LastName)}, last_update AS {nameof(Actor.LastUpdate)} FROM actor
              """;
-        using var connection = new MySqlConnection(GetConnectionStringForShop());
-        var actors = connection.Query<Actor>(sql);
+        using MySqlConnection connection = new MySqlConnection(GetConnectionStringForShop());
+        IEnumerable<Actor> actors = connection.Query<Actor>(sql);
         return actors.ToList();
     }
     
@@ -89,8 +89,8 @@ public class Examples3_RelationshipsSakila
                 FROM customer c JOIN address a on a.address_id = c.address_id
             """;
         
-        using var connection = new MySqlConnection(GetConnectionStringForShop());
-        var customers = connection.Query<Customer, Address, Customer>(sql, 
+        using MySqlConnection connection = new MySqlConnection(GetConnectionStringForShop());
+        IEnumerable<Customer> customers = connection.Query<Customer, Address, Customer>(sql, 
             (customer, address) =>
             {
                 customer.Address = address;
@@ -132,8 +132,8 @@ public class Examples3_RelationshipsSakila
                         JOIN city ci on ci.city_id = a.city_id
             """;
         
-        using var connection = new MySqlConnection(GetConnectionStringForShop());
-        var customers = connection.Query<Customer, Address, City, Customer>(sql, 
+        using MySqlConnection connection = new MySqlConnection(GetConnectionStringForShop());
+        IEnumerable<Customer> customers = connection.Query<Customer, Address, City, Customer>(sql, 
             (customer, address, city) =>
             {
                 customer.Address = address;
@@ -193,8 +193,8 @@ public class Examples3_RelationshipsSakila
                             JOIN country co on co.country_id = ci.country_id
             """;
         
-        using var connection = new MySqlConnection(GetConnectionStringForShop());
-        var customers = connection.Query<Customer, Address, City, Country, Customer>(sql, 
+        using MySqlConnection connection = new MySqlConnection(GetConnectionStringForShop());
+        IEnumerable<Customer> customers = connection.Query<Customer, Address, City, Country, Customer>(sql, 
             (customer, address, city, country) =>
             {
                 customer.Address = address;

@@ -1,0 +1,80 @@
+﻿[
+  {
+    CustomerId: 1,
+    StoreId: 1,
+    FirstName: MARY,
+    LastName: SMITH,
+    Email: MARY.SMITH@sakilacustomer.org,
+    AddressId: 5,
+    Address: {
+      AddressId: 5,
+      Address1: 1913 Hanoi Way,
+      Address2: ,
+      District: Nagasaki,
+      City: {
+        CityId: 463,
+        Name: Sasebo,
+        CountryId: 50,
+        LastUpdate: DateTime_1
+      },
+      PostalCode: 35200,
+      Phone: 28303384290,
+      LastUpdate: DateTime_2
+    },
+    Active: true,
+    CreateDate: DateTime_3,
+    LastUpdate: DateTime_4
+  },
+  {
+    CustomerId: 2,
+    StoreId: 1,
+    FirstName: PATRICIA,
+    LastName: JOHNSON,
+    Email: PATRICIA.JOHNSON@sakilacustomer.org,
+    AddressId: 6,
+    Address: {
+      AddressId: 6,
+      Address1: 1121 Loja Avenue,
+      Address2: ,
+      District: California,
+      City: {
+        CityId: 449,
+        Name: San Bernardino,
+        CountryId: 103,
+        LastUpdate: DateTime_1
+      },
+      PostalCode: 17886,
+      Phone: 838635286649,
+      LastUpdate: DateTime_5
+    },
+    Active: true,
+    CreateDate: DateTime_3,
+    LastUpdate: DateTime_4
+  },
+  {
+    CustomerId: 3,
+    StoreId: 1,
+    FirstName: LINDA,
+    LastName: WILLIAMS,
+    Email: LINDA.WILLIAMS@sakilacustomer.org,
+    AddressId: 7,
+    Address: {
+      AddressId: 7,
+      Address1: 692 Joliet Street,
+      Address2: ,
+      District: Attika,
+      City: {
+        CityId: 38,
+        Name: Athenai,
+        CountryId: 39,
+        LastUpdate: DateTime_1
+      },
+      PostalCode: 83579,
+      Phone: 448477190408,
+      LastUpdate: DateTime_6
+    },
+    Active: true,
+    CreateDate: DateTime_3,
+    LastUpdate: DateTime_4
+  }
+]

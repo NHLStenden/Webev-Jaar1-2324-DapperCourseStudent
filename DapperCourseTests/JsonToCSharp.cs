@@ -66,29 +66,29 @@ public class JsonToCSharp
     [Test]
     public void TestGetCustomersWithRentedMovies()
     {
-        var customers = GetCustomersWithRentedMovies();
+        List<Customer> customers = GetCustomersWithRentedMovies();
         Assert.AreEqual(19, customers.Count);
     }
 
     public static List<Customer> GetCustomersWithRentedMovies()
     {
-        var sql = """
-                  SELECT JSON_MERGE_PATCH(c.CutsomerObject,
-                                          JSON_OBJECT('movies',
-                                                      JSON_ARRAYAGG(DISTINCT f.FilmActorAsJson ORDER BY JSON_EXTRACT(f.FilmActorAsJson, '$.Title')) )) as CustomerObject
-                  FROM rental r
-                           JOIN customersAsJson c on r.customer_id = c.customer_id
-                           JOIN inventory  i ON r.inventory_id = i.inventory_id
-                           JOIN filmAndActorAsJson f ON i.film_id = f.film_Id
-                  
-                  -- WHERE c.customer_id = 19
-                  GROUP BY c.customer_id;
-                  """;
+        string sql = """
+                     SELECT JSON_MERGE_PATCH(c.CutsomerObject,
+                                             JSON_OBJECT('movies',
+                                                         JSON_ARRAYAGG(DISTINCT f.FilmActorAsJson ORDER BY JSON_EXTRACT(f.FilmActorAsJson, '$.Title')) )) as CustomerObject
+                     FROM rental r
+                              JOIN customersAsJson c on r.customer_id = c.customer_id
+                              JOIN inventory  i ON r.inventory_id = i.inventory_id
+                              JOIN filmAndActorAsJson f ON i.film_id = f.film_Id
+
+                     -- WHERE c.customer_id = 19
+                     GROUP BY c.customer_id;
+                     """;
         
-        using var connection =
+        using MySqlConnection connection =
             new MySqlConnection("host=localhost;port=3307;user id=root;password=Test@1234!;database=sakila;");
 
-        var jsonCustomers = connection
+        List<Customer> jsonCustomers = connection
             .Query<string>(sql)
             .Select(jsonCustomer => JsonSerializer.Deserialize<Customer>(jsonCustomer)!)
             .ToList();

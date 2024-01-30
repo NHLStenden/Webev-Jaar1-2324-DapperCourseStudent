@@ -2,13 +2,14 @@ using System.Text.Json;
 using Dapper;
 using MySqlConnector;
 
-namespace DapperCourseTests.SQL;
+namespace DapperCourseTests;
 
-public class Examples3_JsonViews
+public class Examples3JsonViews
 {
-    private static string GetConnectionString()
+    private static readonly string ConnectionString;
+    static Examples3JsonViews()
     {
-        return "Server=localhost;port=3306;Database=sakila;Uid=root;Pwd=Test@1234!";
+        ConnectionString = ConnectionStrings.GetConnectionStringSakila();
     }
     
     public List<Customer> GetCustomerWithRentalsAndActors()
@@ -48,7 +49,7 @@ public class Examples3_JsonViews
 
         //To create the datamodel from the query I use the website: https://json2csharp.com/
         //This way I don't need to create the datamodel by hand :-). 
-        using var connection = new MySqlConnection(GetConnectionString());
+        using MySqlConnection connection = new MySqlConnection(ConnectionString);
         return 
             connection
                 .Query<string>(sql)

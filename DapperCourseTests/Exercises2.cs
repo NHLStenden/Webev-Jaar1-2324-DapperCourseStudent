@@ -24,9 +24,9 @@ public class Exercises2
     [Test]
     public void TestDatabaseIsCreatedAndFilled()
     {
-        using var connection = new MySqlConnection(GetConnectionString());
-        var sql = """SELECT COUNT(*) FROM nicer_but_slower_film_list""";
-        var count = connection.ExecuteScalar<int>(sql);
+        using MySqlConnection connection = new MySqlConnection(GetConnectionString());
+        string sql = """SELECT COUNT(*) FROM nicer_but_slower_film_list""";
+        int count = connection.ExecuteScalar<int>(sql);
         count.Should().Be(1000);
     }
     
@@ -48,24 +48,24 @@ public class Exercises2
     
     public List<CustomerForSqlInjection> GetCustomerByEmail(string email)
     {
-        using var connection = new MySqlConnection(GetConnectionString());
-        var sql = $"""
-                    SELECT customer_id as CustomerId, first_name as FirstName, last_name as LastName, email as Email 
-                    FROM customer WHERE email = '{email}'
-                   """;
-        var customer = connection.Query<CustomerForSqlInjection>(sql);
+        using MySqlConnection connection = new MySqlConnection(GetConnectionString());
+        string sql = $"""
+                       SELECT customer_id as CustomerId, first_name as FirstName, last_name as LastName, email as Email
+                       FROM customer WHERE email = '{email}'
+                      """;
+        IEnumerable<CustomerForSqlInjection> customer = connection.Query<CustomerForSqlInjection>(sql);
         return customer.ToList();
     }
     
     [Test]
     public void SqlInjectionTest()
     {
-        var email = "PATRICIA.JOHNSON@sakilacustomer.org";
-        using var connection = new MySqlConnection(GetConnectionString());
+        string email = "PATRICIA.JOHNSON@sakilacustomer.org";
+        using MySqlConnection connection = new MySqlConnection(GetConnectionString());
         
         GetCustomerByEmail(email).Should().HaveCount(1);
 
-        var allCustomers = GetCustomerByEmail("PATRICIA.JOHNSON@sakilacustomer.org' OR 1 = 1 -- ");
+        List<CustomerForSqlInjection> allCustomers = GetCustomerByEmail("PATRICIA.JOHNSON@sakilacustomer.org' OR 1 = 1 -- ");
         allCustomers.Should().HaveCount(599); //this demonstrates SQL injection, we get all the customers instead of the one we want
     }
     
@@ -73,24 +73,24 @@ public class Exercises2
     //Always use SQL Parameter Placeholders!!!!!
     public List<CustomerForSqlInjection> GetCustomerByEmail2(string email)
     {
-        using var connection = new MySqlConnection(GetConnectionString());
-        var sql = $"""
-                    SELECT customer_id as CustomerId, first_name as FirstName, last_name as LastName, email as Email
-                    FROM customer WHERE email = @email
-                   """;
-        var customer = connection.Query<CustomerForSqlInjection>(sql, new {email});
+        using MySqlConnection connection = new MySqlConnection(GetConnectionString());
+        string sql = $"""
+                       SELECT customer_id as CustomerId, first_name as FirstName, last_name as LastName, email as Email
+                       FROM customer WHERE email = @email
+                      """;
+        IEnumerable<CustomerForSqlInjection> customer = connection.Query<CustomerForSqlInjection>(sql, new {email});
         return customer.ToList();
     }
     
     [Test]
     public void SqlInjectionPreventionTest()
     {
-        var email = "PATRICIA.JOHNSON@sakilacustomer.org";
-        using var connection = new MySqlConnection(GetConnectionString());
+        string email = "PATRICIA.JOHNSON@sakilacustomer.org";
+        using MySqlConnection connection = new MySqlConnection(GetConnectionString());
         
         GetCustomerByEmail(email).Should().HaveCount(1);
 
-        var allCustomers = GetCustomerByEmail2("PATRICIA.JOHNSON@sakilacustomer.org' OR 1 = 1 -- ");
+        List<CustomerForSqlInjection> allCustomers = GetCustomerByEmail2("PATRICIA.JOHNSON@sakilacustomer.org' OR 1 = 1 -- ");
         allCustomers.Should().HaveCount(0); //this demonstrates SQL injection, we get all the customers instead of the one we want
     }
 
@@ -133,27 +133,27 @@ public class Exercises2
     
     public List<RentalView> ViewExercises1()
     {
-        using var connection = new MySqlConnection(GetConnectionString());
-        var sql = """
-                    DROP VIEW IF EXISTS rental_view;
-                    CREATE VIEW rental_view AS
-                    SELECT r.rental_id as RentalId, r.rental_date as RentalDate, r.inventory_id as InventoryId, 
-                    r.customer_id as CustomerId, r.return_date as ReturnDate, 
-                        r.staff_id as StaffId, r.last_update as RentalLastUpdate,
-                           c.first_name as FirstName, c.last_name as LastName, c.email as Email, c.address_id as AddressId, 
-                           c.active as Active, c.create_date as CreateDate,
-                           i.film_id as FilmId, i.store_id as StoreId, i.last_update as InventoryLastUpdate,
-                           f.title as Title, f.description as Description, f.release_year as ReleaseYear, f.language_id as LanguageId, 
-                           f.original_language_id as OriginalLanguageId, f.rental_duration as RentalDuration, 
-                           f.rental_rate as RentalRate, 
-                           f.length as Length , f.replacement_cost as ReplacementCost, 
-                           f.rating as Rating, f.special_features as SpecialFeatures, 
-                           f.last_update as FilmLastUpdate
-                    FROM rental r
-                        JOIN customer c ON r.customer_id = c.customer_id
-                            JOIN inventory i ON r.inventory_id = i.inventory_id
-                                JOIN film f ON i.film_id = f.film_id
-                   """;
+        using MySqlConnection connection = new MySqlConnection(GetConnectionString());
+        string sql = """
+                      DROP VIEW IF EXISTS rental_view;
+                      CREATE VIEW rental_view AS
+                      SELECT r.rental_id as RentalId, r.rental_date as RentalDate, r.inventory_id as InventoryId,
+                      r.customer_id as CustomerId, r.return_date as ReturnDate,
+                          r.staff_id as StaffId, r.last_update as RentalLastUpdate,
+                             c.first_name as FirstName, c.last_name as LastName, c.email as Email, c.address_id as AddressId,
+                             c.active as Active, c.create_date as CreateDate,
+                             i.film_id as FilmId, i.store_id as StoreId, i.last_update as InventoryLastUpdate,
+                             f.title as Title, f.description as Description, f.release_year as ReleaseYear, f.language_id as LanguageId,
+                             f.original_language_id as OriginalLanguageId, f.rental_duration as RentalDuration,
+                             f.rental_rate as RentalRate,
+                             f.length as Length , f.replacement_cost as ReplacementCost,
+                             f.rating as Rating, f.special_features as SpecialFeatures,
+                             f.last_update as FilmLastUpdate
+                      FROM rental r
+                          JOIN customer c ON r.customer_id = c.customer_id
+                              JOIN inventory i ON r.inventory_id = i.inventory_id
+                                  JOIN film f ON i.film_id = f.film_id
+                     """;
         connection.Execute(sql);
 
 
@@ -164,10 +164,10 @@ public class Exercises2
     public void ViewExercises1Test()
     {
         // Arrange
-        var sut = new Exercises2();
+        Exercises2 sut = new Exercises2();
         
         // Act
-        var result = sut.ViewExercises1();
+        List<RentalView> result = sut.ViewExercises1();
         
         // Assert
         result.Should().HaveCount(16044);
@@ -195,8 +195,8 @@ public class Exercises2
                      SELECT CustomerId, LastName, FirstName, COUNT(*) as AmountOfRentals
                      FROM rental_view GROUP BY CustomerId ORDER BY AmountOfRentals DESC LIMIT 10
                      """;
-        using var connection = new MySqlConnection(GetConnectionString());
-        var result = connection.Query<TopRentalCustomers>(sql);
+        using MySqlConnection connection = new MySqlConnection(GetConnectionString());
+        IEnumerable<TopRentalCustomers> result = connection.Query<TopRentalCustomers>(sql);
         return result.ToList();
     }
     
@@ -204,10 +204,10 @@ public class Exercises2
     public void ViewExercises2Test()
     {
         // Arrange
-        var sut = new Exercises2();
+        Exercises2 sut = new Exercises2();
         
         // Act
-        var result = sut.ViewExercises2();
+        List<TopRentalCustomers> result = sut.ViewExercises2();
         
         // Assert
         result.Should().HaveCount(10);
@@ -245,8 +245,8 @@ public class Exercises2
                             ORDER BY COUNT(*) DESC
                             LIMIT 10
                      """;
-        using var connection = new MySqlConnection(GetConnectionString());
-        var result = connection.Query<RentalByCountry>(sql).ToList();
+        using MySqlConnection connection = new MySqlConnection(GetConnectionString());
+        List<RentalByCountry> result = connection.Query<RentalByCountry>(sql).ToList();
         return result;
     }
     
@@ -254,10 +254,10 @@ public class Exercises2
     public void ViewExercises3Test()
     {
         // Arrange
-        var sut = new Exercises2();
+        Exercises2 sut = new Exercises2();
         
         // Act
-        var result = sut.ViewExercises3();
+        List<RentalByCountry> result = sut.ViewExercises3();
         
         // Assert
         result.Should().HaveCount(10);
@@ -299,7 +299,7 @@ public class Exercises2
                             JOIN country co ON ci.country_id = co.country_id;
             """;
         
-        using var connection = new MySqlConnection(GetConnectionString());
+        using MySqlConnection connection = new MySqlConnection(GetConnectionString());
         connection.Execute(createCustomerView);
         
         string sql = """
@@ -310,7 +310,7 @@ public class Exercises2
                         ORDER BY AmountOfRentalsByCountry DESC
                         LIMIT 10
                      """;
-        var result = connection.Query<RentalByCountry>(sql).ToList();
+        List<RentalByCountry> result = connection.Query<RentalByCountry>(sql).ToList();
         return result;
     }
     
@@ -318,10 +318,10 @@ public class Exercises2
     public void ViewExercises4Test()
     {
         // Arrange
-        var sut = new Exercises2();
+        Exercises2 sut = new Exercises2();
         
         // Act
-        var result = sut.ViewExercises4();
+        List<RentalByCountry> result = sut.ViewExercises4();
         
         // Assert
         result.Should().HaveCount(10);
@@ -364,8 +364,8 @@ public class Exercises2
                 LIMIT 10
             """;
         
-        using var connection = new MySqlConnection(GetConnectionString());
-        var result = connection.Query<CustomerSearch>(sql, 
+        using MySqlConnection connection = new MySqlConnection(GetConnectionString());
+        List<CustomerSearch> result = connection.Query<CustomerSearch>(sql, 
             new {city}).ToList();
 
         return result;
@@ -375,10 +375,10 @@ public class Exercises2
     public void ExerciseParameter1Test()
     {
         // Arrange
-        var sut = new Exercises2();
+        Exercises2 sut = new Exercises2();
 
         // Act
-        var result = sut.ExerciseParameter1("London");
+        List<CustomerSearch> result = sut.ExerciseParameter1("London");
 
         // Assert
         result.Should().HaveCount(2);
@@ -410,8 +410,8 @@ public class Exercises2
                 LIMIT 10
             """;
         
-        using var connection = new MySqlConnection(GetConnectionString());
-        var result = connection.Query<CustomerSearch>(sql, 
+        using MySqlConnection connection = new MySqlConnection(GetConnectionString());
+        List<CustomerSearch> result = connection.Query<CustomerSearch>(sql, 
             new {City = city}).ToList();
 
         return result;
@@ -421,10 +421,10 @@ public class Exercises2
     public void ExerciseParameter2Test()
     {
         // Arrange
-        var sut = new Exercises2();
+        Exercises2 sut = new Exercises2();
 
         // Act -- optional parameter
-        var result = sut.ExerciseParameter2("London");
+        List<CustomerSearch> result = sut.ExerciseParameter2("London");
 
         // Assert
         result.Should().HaveCount(2);
@@ -436,7 +436,7 @@ public class Exercises2
         result.Last().Email.Should().Be("CECIL.VINES@sakilacustomer.org");
         
         // Act -- no optional parameter
-        var result2 = sut.ExerciseParameter2();
+        List<CustomerSearch> result2 = sut.ExerciseParameter2();
 
         result2.Should().HaveCount(10);
     }
@@ -463,8 +463,8 @@ public class Exercises2
                 LIMIT 10
             """;
         
-        using var connection = new MySqlConnection(GetConnectionString());
-        var result = connection.Query<CustomerSearch>(sql, 
+        using MySqlConnection connection = new MySqlConnection(GetConnectionString());
+        List<CustomerSearch> result = connection.Query<CustomerSearch>(sql, 
             new {City = city, Country = country}).ToList();
 
         return result;
@@ -474,10 +474,10 @@ public class Exercises2
     public void ExerciseParameter3()
     {
         // Arrange
-        var sut = new Exercises2();
+        Exercises2 sut = new Exercises2();
 
         // Act one parameter (country)
-        var result = sut.ExerciseParameter3(city: "London");
+        List<CustomerSearch> result = sut.ExerciseParameter3(city: "London");
 
         // Assert
         result.Should().HaveCount(2);
@@ -502,7 +502,7 @@ public class Exercises2
         result.Last().Email.Should().Be("VIVIAN.RUIZ@sakilacustomer.org");
         
         // Act -- optional parameter
-        var result2 = sut.ExerciseParameter2();
+        List<CustomerSearch> result2 = sut.ExerciseParameter2();
 
         result2.Should().HaveCount(10);
         result2.First().Email.Should().Be("RAFAEL.ABNEY@sakilacustomer.org");
@@ -545,8 +545,8 @@ public class Exercises2
                 LIMIT @PageSize OFFSET @Offset
             """;
         
-        using var connection = new MySqlConnection(GetConnectionString());
-        var result = connection.Query<CustomerSearch>(sql, 
+        using MySqlConnection connection = new MySqlConnection(GetConnectionString());
+        List<CustomerSearch> result = connection.Query<CustomerSearch>(sql, 
                 customerSearchParameters
             ).ToList();
 
@@ -557,15 +557,15 @@ public class Exercises2
     public void ExerciseParameter4Test()
     {
         // Arrange
-        var sut = new Exercises2();
-        var customerSearchParameters = new CustomerSearchParameters()
+        Exercises2 sut = new Exercises2();
+        CustomerSearchParameters customerSearchParameters = new CustomerSearchParameters()
         {
             Country = "India",
             
         };
 
         // Act
-        var result = sut.ExerciseParameter4(customerSearchParameters);
+        List<CustomerSearch> result = sut.ExerciseParameter4(customerSearchParameters);
 
         // Assert
         result.Should().HaveCount(10);
@@ -575,13 +575,13 @@ public class Exercises2
 
         result.Last().CustomerId.Should().Be(512);
 
-        var customerSearchParameters2 = new CustomerSearchParameters()
+        CustomerSearchParameters customerSearchParameters2 = new CustomerSearchParameters()
         {
             PageNumber = 3, PageSize = 10
         };
         
         // Act
-        var result2 = sut.ExerciseParameter4(customerSearchParameters2);
+        List<CustomerSearch> result2 = sut.ExerciseParameter4(customerSearchParameters2);
         
         //TODO: fix test
     }
@@ -643,10 +643,10 @@ public class Exercises2
                 alter table customer_copy MODIFY COLUMN customer_id INT AUTO_INCREMENT; 
             """;
         
-        using var connection = new MySqlConnection(GetConnectionString());
+        using MySqlConnection connection = new MySqlConnection(GetConnectionString());
         connection.Execute(sql);
 
-        var insertSql =
+        string insertSql =
             """
                 INSERT INTO customer_copy (store_id, first_name, last_name, email, address_id, active, create_date, last_update)
                 VALUES (@StoreId, @FirstName, @LastName, @Email, @AddressId, @Active, @CreateDate, @LastUpdate);
@@ -660,8 +660,8 @@ public class Exercises2
     public void InsertCustomerCopyTest()
     {
         // Arrange
-        var sut = new Exercises2();
-        var insertCustomerParameters = new InsertCustomerParameters()
+        Exercises2 sut = new Exercises2();
+        InsertCustomerParameters insertCustomerParameters = new InsertCustomerParameters()
         {
             StoreId = 1,
             FirstName = "Test123",
@@ -675,18 +675,18 @@ public class Exercises2
         };
 
         // Act
-        var result = sut.InsertCustomerCopy(insertCustomerParameters);
+        int result = sut.InsertCustomerCopy(insertCustomerParameters);
 
         // Assert
         result.Should().Be(1);
         
-        using var connection = new MySqlConnection(GetConnectionString());
-        var sql = """
-                  SELECT customer_id as CustomerId, store_id as StoreId, first_name as FirstName, last_name as LastName,
-                    email as Email, address_id as AddressId, active as Active, create_date as CreateDate, last_update as LastUpdate
-                      FROM customer_copy
-                  """;
-        var customerCopy = connection.Query<InsertCustomerParameters>(sql).First();
+        using MySqlConnection connection = new MySqlConnection(GetConnectionString());
+        string sql = """
+                     SELECT customer_id as CustomerId, store_id as StoreId, first_name as FirstName, last_name as LastName,
+                       email as Email, address_id as AddressId, active as Active, create_date as CreateDate, last_update as LastUpdate
+                         FROM customer_copy
+                     """;
+        InsertCustomerParameters customerCopy = connection.Query<InsertCustomerParameters>(sql).First();
         customerCopy.Should().BeEquivalentTo(insertCustomerParameters, options => options.Excluding(x => x.CustomerId));
     }
     
@@ -732,7 +732,7 @@ public class Exercises2
                                                 primary key (city_id);
                                         alter table city_copy MODIFY COLUMN city_id INT AUTO_INCREMENT;
                                      """;
-        using var connection = new MySqlConnection(GetConnectionString());
+        using MySqlConnection connection = new MySqlConnection(GetConnectionString());
         connection.Execute(sqlCreateCopyTables);
         
         
@@ -753,7 +753,7 @@ public class Exercises2
                                 INSERT INTO city_copy (city, country_id, last_update) VALUES (@City, @CountryId, @LastUpdate);
                                 SELECT LAST_INSERT_ID();
                                """;
-        var cityId = connection.ExecuteScalar<int>(sqlInsertCity, new {City = insertCity.City, CountryId = countryId, insertCity.LastUpdate});
+        int cityId = connection.ExecuteScalar<int>(sqlInsertCity, new {City = insertCity.City, CountryId = countryId, insertCity.LastUpdate});
         return cityId;
     }
 
@@ -761,35 +761,35 @@ public class Exercises2
     public void InsertCityExercisesTest()
     {
         // Arrange
-        var sut = new Exercises2();
+        Exercises2 sut = new Exercises2();
 
 
-        var lastUpdated = DateTime.Now;
-        var country = new InsertCountry()
+        DateTime lastUpdated = DateTime.Now;
+        InsertCountry country = new InsertCountry()
         {
             Country = "Belgium",
             LastUpdate = lastUpdated
         };
         
-        var city = new InsertCity()
+        InsertCity city = new InsertCity()
         {
             City = "Antwerp",
             LastUpdate = lastUpdated
         };
         
         // Act
-        var result = sut.InsertCityExercises(country, city);
+        int result = sut.InsertCityExercises(country, city);
         
         // Assert
         result.Should().Be(1);
         
-        using var connection = new MySqlConnection(GetConnectionString());
-        var sql = """
-                  SELECT city_id as CityId, city as City, country_id as CountryId, last_update as LastUpdate
-                      FROM city_copy
-                  """;
+        using MySqlConnection connection = new MySqlConnection(GetConnectionString());
+        string sql = """
+                     SELECT city_id as CityId, city as City, country_id as CountryId, last_update as LastUpdate
+                         FROM city_copy
+                     """;
         
-        var cityCopy = connection.Query<CityForTest>(sql).First();
+        CityForTest cityCopy = connection.Query<CityForTest>(sql).First();
         cityCopy.Should().BeEquivalentTo(new CityForTest()
         {
             CityId = 1, CountryId = 1
@@ -797,7 +797,7 @@ public class Exercises2
         }, options => options.Excluding(x => x.LastUpdate));
         
         // Arrange
-        var city2 = new InsertCity()
+        InsertCity city2 = new InsertCity()
         {
             City = "Brussels",
             LastUpdate = lastUpdated

@@ -6,9 +6,10 @@ namespace DapperCourseTests;
 
 public class Examples2
 {
-    private static string GetConnectionString()
+    private static readonly string ConnectionString;
+    static Examples2()
     {
-        return "Server=localhost;port=3306;Database=sakila;Uid=root;Pwd=Test@1234!";
+        ConnectionString = ConnectionStrings.GetConnectionStringSakila();
     }
     
     // Be really careful with SQL injection!
@@ -23,8 +24,8 @@ public class Examples2
     // Always use parameters! See the examples below!
     public List<FilmListSlower> SqlInjectionExample(string category)
     {
-        using var connection = new MySqlConnection(GetConnectionString());
-        var sql = $@"
+        using MySqlConnection connection = new MySqlConnection(ConnectionString);
+        string sql = $@"
                     SELECT fid as FilmId, title as Title, description as Description, category as Category, price as Price, 
                            length as Length, rating as Rating, actors as Actors
                     FROM nicer_but_slower_film_list
@@ -39,7 +40,7 @@ public class Examples2
         //            WHERE category = '" + category + @"'
         //          ";
         
-        var films = connection.Query<FilmListSlower>(sql);
+        IEnumerable<FilmListSlower> films = connection.Query<FilmListSlower>(sql);
         return films.ToList();
     }
     
@@ -47,10 +48,10 @@ public class Examples2
     public void SqlInjectionExampleTest()
     {
         // Arrange
-        var sut = new Examples2();
+        Examples2 sut = new Examples2();
         
         // Act
-        var allCategoriesMovies = sut.SqlInjectionExample("Action' OR 1 = 1 -- ");
+        List<FilmListSlower> allCategoriesMovies = sut.SqlInjectionExample("Action' OR 1 = 1 -- ");
         
         // Assert
         allCategoriesMovies.Should().HaveCount(1000);
@@ -76,13 +77,13 @@ public class Examples2
     
     public List<FilmListSlower> GetFilmListSlower()
     {
-        using var connection = new MySqlConnection(GetConnectionString());
-        var sql = """
-                    SELECT fid as FilmId, title as Title, description as Description, category as Category, price as Price, 
-                           length as Length, rating as Rating, actors as Actors
-                    FROM nicer_but_slower_film_list
-                  """;
-        var films = connection.Query<FilmListSlower>(sql);
+        using MySqlConnection connection = new MySqlConnection(ConnectionString);
+        string sql = """
+                       SELECT fid as FilmId, title as Title, description as Description, category as Category, price as Price,
+                              length as Length, rating as Rating, actors as Actors
+                       FROM nicer_but_slower_film_list
+                     """;
+        IEnumerable<FilmListSlower> films = connection.Query<FilmListSlower>(sql);
         return films.ToList();
     }
     
@@ -90,10 +91,10 @@ public class Examples2
     public void GetFilmListSlowerTest()
     {
         // Arrange
-        var sut = new Examples2();
+        Examples2 sut = new Examples2();
         
         // Act
-        var films = sut.GetFilmListSlower();
+        List<FilmListSlower> films = sut.GetFilmListSlower();
 
         // Assert
         Assert.That(films, Is.Not.Null);
@@ -107,14 +108,14 @@ public class Examples2
     // https://www.learndapper.com/parameters/
     public List<FilmListSlower> GetFilmListSlowerWithCategoryParameter(string category)
     {
-        using var connection = new MySqlConnection(GetConnectionString());
-        var sql = """
-                    SELECT fid as FilmId, title as Title, description as Description, category as Category, price as Price, 
-                           length as Length, rating as Rating, actors as Actors
-                    FROM nicer_but_slower_film_list
-                    WHERE category = @Category
-                  """;
-        var films = connection.Query<FilmListSlower>(sql, param: new {Category = category});
+        using MySqlConnection connection = new MySqlConnection(ConnectionString);
+        string sql = """
+                       SELECT fid as FilmId, title as Title, description as Description, category as Category, price as Price,
+                              length as Length, rating as Rating, actors as Actors
+                       FROM nicer_but_slower_film_list
+                       WHERE category = @Category
+                     """;
+        IEnumerable<FilmListSlower> films = connection.Query<FilmListSlower>(sql, param: new {Category = category});
         return films.ToList();
     }
     
@@ -122,10 +123,10 @@ public class Examples2
     public void GetFilmListSlowerWithCategoryParameterTest()
     {
         // Arrange
-        var sut = new Examples2();
+        Examples2 sut = new Examples2();
         
         // Act
-        var actionFilms = sut.GetFilmListSlowerWithCategoryParameter("Action");
+        List<FilmListSlower> actionFilms = sut.GetFilmListSlowerWithCategoryParameter("Action");
         
         // Assert
         Assert.That(actionFilms, Is.Not.Null);
@@ -145,8 +146,8 @@ public class Examples2
     // (because the table is empty and no rows are affected).
     public int CreateDatabaseTableWatchlistAndWatchListCategory()
     {
-        using var connection = new MySqlConnection(GetConnectionString());
-        var sql = @"
+        using MySqlConnection connection = new MySqlConnection(ConnectionString);
+        string sql = @"
                     DROP TABLE IF EXISTS watchlist;
                     CREATE TABLE watchlist (
                         id INT NOT NULL AUTO_INCREMENT,
@@ -170,15 +171,15 @@ public class Examples2
     public void CreateDatabaseTableWatchlistTest()
     {
         // Arrange
-        var sut = new Examples2();
+        Examples2 sut = new Examples2();
         
         // Act
-        var numberOfEffectedRows = sut.CreateDatabaseTableWatchlistAndWatchListCategory();
+        int numberOfEffectedRows = sut.CreateDatabaseTableWatchlistAndWatchListCategory();
         
         // Assert
         numberOfEffectedRows.Should().Be(0);
         
-        using var connection = new MySqlConnection(GetConnectionString());
+        using MySqlConnection connection = new MySqlConnection(ConnectionString);
         int checkTableExists1 = connection.ExecuteScalar<int>("SELECT COUNT(*) FROM watchlist");
         checkTableExists1.Should().Be(0);
         int checkTableExists2 = connection.ExecuteScalar<int>("SELECT COUNT(*) FROM watchlist_category");
@@ -203,17 +204,17 @@ public class Examples2
     // This method returns the id of the inserted row in the table watchlist.
     public int InsertIntoWatchList(string categoryTitle, string movieTitle)
     {
-        var insertWatchlistCategory = @"
+        string insertWatchlistCategory = @"
                     INSERT INTO watchlist_category (title) VALUES (@Title);
                     SELECT LAST_INSERT_ID();
                   ";
         
-        var insertIntoWatchlist = @"
+        string insertIntoWatchlist = @"
                     INSERT INTO watchlist (title, watchlist_category_id) VALUES (@Title, @WatchlistCategoryId);
                     SELECT LAST_INSERT_ID();
                   ";
         
-        using var connection = new MySqlConnection(GetConnectionString());
+        using MySqlConnection connection = new MySqlConnection(ConnectionString);
         int watchlistCategoryId = connection.
             ExecuteScalar<int>(insertWatchlistCategory, param: new {Title = categoryTitle});
         
@@ -227,16 +228,16 @@ public class Examples2
     public void InsertIntoWatchListTest()
     {
         // Arrange
-        var sut = new Examples2();
+        Examples2 sut = new Examples2();
         CreateDatabaseTableWatchlistAndWatchListCategory();
         
         // Act
-        var idOfInsertedRow = sut.InsertIntoWatchList("Action List", "The Matrix");
+        int idOfInsertedRow = sut.InsertIntoWatchList("Action List", "The Matrix");
         
         // Assert
         idOfInsertedRow.Should().Be(1);
         
-        using var connection = new MySqlConnection(GetConnectionString());
+        using MySqlConnection connection = new MySqlConnection(ConnectionString);
         string sql =
             """
                 SELECT w.title as MovieTitle, wc.title as CategoryTitle
@@ -245,7 +246,7 @@ public class Examples2
             """;
         
         // I'm not a big fan of tuples, but it's a good way to return multiple values from a query without creating a new class
-        var movies = connection.Query<(string, string)>(sql).ToList();
+        List<(string, string)> movies = connection.Query<(string, string)>(sql).ToList();
         movies.First().Item1.Should().Be("The Matrix");
         movies.First().Item2.Should().Be("Action List");
     }
@@ -254,11 +255,11 @@ public class Examples2
     // When we update a row it's a good idea to return the number of affected rows (this should be 1).
     public int UpdateWatchListCategoryTitle(int watchlistCategoryId, string newTitle)
     {
-        var updateWatchlistCategory = @"
+        string updateWatchlistCategory = @"
                     UPDATE watchlist_category SET title = @NewTitle WHERE id = @WatchlistCategoryId;
                   ";
         
-        using var connection = new MySqlConnection(GetConnectionString());
+        using MySqlConnection connection = new MySqlConnection(ConnectionString);
         int numberOfEffectedRows = connection.Execute(updateWatchlistCategory, param: 
             new {WatchlistCategoryId = watchlistCategoryId, NewTitle = newTitle});
 
@@ -269,17 +270,17 @@ public class Examples2
     public void UpdateWatchListCategoryTitleTest()
     {
         // Arrange
-        var sut = new Examples2();
+        Examples2 sut = new Examples2();
         CreateDatabaseTableWatchlistAndWatchListCategory();
         
         // Act
-        var idOfInsertedRow = sut.InsertIntoWatchList("Action List", "The Matrix");
-        var numberOfEffectedRows = sut.UpdateWatchListCategoryTitle(idOfInsertedRow, "Action List 2");
+        int idOfInsertedRow = sut.InsertIntoWatchList("Action List", "The Matrix");
+        int numberOfEffectedRows = sut.UpdateWatchListCategoryTitle(idOfInsertedRow, "Action List 2");
         
         // Assert
         numberOfEffectedRows.Should().Be(1);
         
-        using var connection = new MySqlConnection(GetConnectionString());
+        using MySqlConnection connection = new MySqlConnection(ConnectionString);
         string sql =
             """
                 SELECT w.title as MovieTitle, wc.title as CategoryTitle
@@ -288,7 +289,7 @@ public class Examples2
             """;
         
         // I'm not a big fan of tuples, but it's a good way to return multiple values from a query without creating a new class
-        var movies = connection.Query<(string, string)>(sql).ToList();
+        List<(string, string)> movies = connection.Query<(string, string)>(sql).ToList();
         movies.First().Item1.Should().Be("The Matrix");
         movies.First().Item2.Should().Be("Action List 2");
     }
@@ -298,11 +299,11 @@ public class Examples2
     // Do you understand why?
     public void DeleteWatchListCategory(int watchlistCategoryId)
     {
-        var deleteWatchlistCategory = @"
+        string deleteWatchlistCategory = @"
                     DELETE FROM watchlist_category WHERE id = @WatchlistCategoryId;
                   ";
         
-        using var connection = new MySqlConnection(GetConnectionString());
+        using MySqlConnection connection = new MySqlConnection(ConnectionString);
         connection.Execute(deleteWatchlistCategory, param: new {WatchlistCategoryId = watchlistCategoryId});
     }
     
@@ -310,15 +311,15 @@ public class Examples2
     public void DeleteWatchListCategoryTest()
     {
         // Arrange
-        var sut = new Examples2();
+        Examples2 sut = new Examples2();
         CreateDatabaseTableWatchlistAndWatchListCategory();
         
         // Act
-        var idOfInsertedRow = sut.InsertIntoWatchList("Action List", "The Matrix");
+        int idOfInsertedRow = sut.InsertIntoWatchList("Action List", "The Matrix");
         sut.DeleteWatchListCategory(idOfInsertedRow);
         
         // Assert
-        using var connection = new MySqlConnection(GetConnectionString());
+        using MySqlConnection connection = new MySqlConnection(ConnectionString);
         string sql =
             """
                 SELECT w.title as MovieTitle, wc.title as CategoryTitle
@@ -327,22 +328,22 @@ public class Examples2
             """;
         
         // I'm not a big fan of tuples, but it's a good way to return multiple values from a query without creating a new class
-        var movies = connection.Query<(string, string)>(sql).ToList();
+        List<(string, string)> movies = connection.Query<(string, string)>(sql).ToList();
         movies.Should().BeEmpty();
     }
     
     public List<FilmListSlower> GetFilmListSlowerWithCategoryParameterAndRating
                                     (string category, string rating)
     {
-        using var connection = new MySqlConnection(GetConnectionString());
-        var sql = """
-                    SELECT fid as FilmId, title as Title, description as Description, category as Category, price as Price, 
-                           length as Length, rating as Rating, actors as Actors
-                    FROM nicer_but_slower_film_list
-                    WHERE category = @Category 
-                        AND rating = @Rating
-                  """;
-        var films = connection.Query<FilmListSlower>(sql, param: new {Category = category, Rating = rating});
+        using MySqlConnection connection = new MySqlConnection(ConnectionString);
+        string sql = """
+                       SELECT fid as FilmId, title as Title, description as Description, category as Category, price as Price,
+                              length as Length, rating as Rating, actors as Actors
+                       FROM nicer_but_slower_film_list
+                       WHERE category = @Category
+                           AND rating = @Rating
+                     """;
+        IEnumerable<FilmListSlower> films = connection.Query<FilmListSlower>(sql, param: new {Category = category, Rating = rating});
         return films.ToList();
     }
     
@@ -350,29 +351,29 @@ public class Examples2
     public void GetFilmListSlowerWithCategoryParameterAndRatingTest()
     {
         // Arrange
-        var sut = new Examples2();
+        Examples2 sut = new Examples2();
         
         // Act
-        var actionFilmsPg13 = sut.GetFilmListSlowerWithCategoryParameterAndRating("Action", "PG-13");
+        List<FilmListSlower> actionFilmsPg13 = sut.GetFilmListSlowerWithCategoryParameterAndRating("Action", "PG-13");
         
         // Assert
         Assert.That(actionFilmsPg13, Is.Not.Null);
     }
 
     public List<FilmListSlower> GetFilmListSlowerWithCategoryParameterAndRatingOptionalParameter
-        (string category = null, string rating = null)
+        (string? category = null, string? rating = null)
     {
-        using var connection = new MySqlConnection(GetConnectionString());
-        var sql = """
-                    SELECT fid as FilmId, title as Title, description as Description, category as Category, price as Price, 
-                           length as Length, rating as Rating, actors as Actors
-                    FROM nicer_but_slower_film_list
-                    WHERE 
-                        (@Category IS NULL OR category = @Category) -- trick with IS NULL and OR to make the parameter optional! Make sure to use parentheses! 
-                        AND 
-                        (@Rating IS NULL OR rating = @Rating) 
-                  """;
-        var films = connection.Query<FilmListSlower>(sql, param: new {Category = category, Rating = rating});
+        using MySqlConnection connection = new MySqlConnection(ConnectionString);
+        string sql = """
+                       SELECT fid as FilmId, title as Title, description as Description, category as Category, price as Price,
+                              length as Length, rating as Rating, actors as Actors
+                       FROM nicer_but_slower_film_list
+                       WHERE
+                           (@Category IS NULL OR category = @Category) -- trick with IS NULL and OR to make the parameter optional! Make sure to use parentheses!
+                           AND
+                           (@Rating IS NULL OR rating = @Rating)
+                     """;
+        IEnumerable<FilmListSlower> films = connection.Query<FilmListSlower>(sql, param: new {Category = category, Rating = rating});
         return films.ToList();
     }
     
@@ -380,29 +381,29 @@ public class Examples2
     public void GetFilmListSlowerWithCategoryParameterAndRatingOptionalParameterTest()
     {
         // Arrange
-        var sut = new Examples2();
+        Examples2 sut = new Examples2();
         
         // Act -- with one parameter (rating)
-        var pg13Films = sut.GetFilmListSlowerWithCategoryParameterAndRatingOptionalParameter(rating: "PG-13");
+        List<FilmListSlower> pg13Films = sut.GetFilmListSlowerWithCategoryParameterAndRatingOptionalParameter(rating: "PG-13");
         
         // Assert
         pg13Films.Should().HaveCount(223);
         
         // Act -- with one parameter (category)
-        var actionFilms = sut.GetFilmListSlowerWithCategoryParameterAndRatingOptionalParameter(category: "Action");
+        List<FilmListSlower> actionFilms = sut.GetFilmListSlowerWithCategoryParameterAndRatingOptionalParameter(category: "Action");
         
         // Assert
         actionFilms.Should().HaveCount(64);
         
         
         // Act -- no parameter
-        var allFilms = sut.GetFilmListSlowerWithCategoryParameterAndRatingOptionalParameter();
+        List<FilmListSlower> allFilms = sut.GetFilmListSlowerWithCategoryParameterAndRatingOptionalParameter();
         
         // Assert
         allFilms.Should().HaveCount(1000);
         
         // Act -- with two parameters
-        var actionFilmsPg13 = sut.GetFilmListSlowerWithCategoryParameterAndRatingOptionalParameter("Action", "PG-13");
+        List<FilmListSlower> actionFilmsPg13 = sut.GetFilmListSlowerWithCategoryParameterAndRatingOptionalParameter("Action", "PG-13");
         allFilms.Should().HaveCount(11);
     }
     
@@ -424,23 +425,23 @@ public class Examples2
     {
         // take a look as alias for columns (fid as FilmId, title as Title, ...)
         // we can use the nameof operator to get the name of the property (nameof(FilmListSlower.FilmId))
-        var sql = $"""
-                    SELECT  fid         as {nameof(FilmListSlower.FilmId)}, 
-                            title       as {nameof(FilmListSlower.Title)}, 
-                            description as {nameof(FilmListSlower.Description)}, 
-                            category    as {nameof(FilmListSlower.Category)}, 
-                            price       as {nameof(FilmListSlower.Price)},
-                            length      as {nameof(FilmListSlower.Length)},
-                            rating      as {nameof(FilmListSlower.Rating)},
-                            actors      as {nameof(FilmListSlower.Actors)}
-                    FROM nicer_but_slower_film_list
-                    ORDER BY @SortColumn @SortDirection
-                    LIMIT @PageSize
-                    OFFSET @Offset -- @(Page - 1) * @PageSize -- this is not correct for MySQL!
-                  """;
+        string sql = $"""
+                        SELECT  fid         as {nameof(FilmListSlower.FilmId)},
+                                title       as {nameof(FilmListSlower.Title)},
+                                description as {nameof(FilmListSlower.Description)},
+                                category    as {nameof(FilmListSlower.Category)},
+                                price       as {nameof(FilmListSlower.Price)},
+                                length      as {nameof(FilmListSlower.Length)},
+                                rating      as {nameof(FilmListSlower.Rating)},
+                                actors      as {nameof(FilmListSlower.Actors)}
+                        FROM nicer_but_slower_film_list
+                        ORDER BY @SortColumn @SortDirection
+                        LIMIT @PageSize
+                        OFFSET @Offset -- @(Page - 1) * @PageSize -- this is not correct for MySQL!
+                      """;
         
-        using var connection = new MySqlConnection(GetConnectionString());
-        var films = connection.Query<FilmListSlower>(sql, 
+        using MySqlConnection connection = new MySqlConnection(ConnectionString);
+        IEnumerable<FilmListSlower> films = connection.Query<FilmListSlower>(sql, 
                 param: new {
                     Offset = (page - 1) * pageSize, 
                     PageSize = pageSize, 
@@ -455,23 +456,23 @@ public class Examples2
     public void GetFilmListSlowerWithPagingAndSortingTest()
     {
         // Arrange
-        var sut = new Examples2();
+        Examples2 sut = new Examples2();
         
         // Act
-        var films = sut.GetFilmListSlowerWithPagingAndSorting();
+        List<FilmListSlower> films = sut.GetFilmListSlowerWithPagingAndSorting();
         
         // Assert
         films.Should().HaveCount(10);
         
         
         // Act
-        var filmsPage2 = sut.GetFilmListSlowerWithPagingAndSorting(page: 1, sortDirection: "DESC");
+        List<FilmListSlower> filmsPage2 = sut.GetFilmListSlowerWithPagingAndSorting(page: 1, sortDirection: "DESC");
         
         // Assert
         filmsPage2.Should().HaveCount(10);
         
         // Act
-        var filmsPage3 = sut.GetFilmListSlowerWithPagingAndSorting(page: 2, sortColumn: "title");
+        List<FilmListSlower> filmsPage3 = sut.GetFilmListSlowerWithPagingAndSorting(page: 2, sortColumn: "title");
         filmsPage2.Should().HaveCount(10);
     }
     
@@ -489,7 +490,7 @@ public class Examples2
     public List<FilmListSlower> GetFilmsWithPagingAndSorting(PageAndSortParameters pageAndSortParameters)
     {
 
-        var sql = @"
+        string sql = @"
                     SELECT fid as FilmId, title as Title, description as Description, category as Category, price as Price, 
                            length as Length, rating as Rating, actors as Actors
                     FROM nicer_but_slower_film_list
@@ -498,8 +499,8 @@ public class Examples2
                     OFFSET @Offset
                   ";
         
-        using var connection = new MySqlConnection(GetConnectionString());
-        var films = connection.Query<FilmListSlower>(sql, 
+        using MySqlConnection connection = new MySqlConnection(ConnectionString);
+        IEnumerable<FilmListSlower> films = connection.Query<FilmListSlower>(sql, 
             param: pageAndSortParameters);
         return films.ToList();
     }
@@ -508,23 +509,23 @@ public class Examples2
     public void GetFilmsWithPagingAndSortingTest()
     {
         // Arrange
-        var sut = new Examples2();
+        Examples2 sut = new Examples2();
         
         // Act
-        var films = sut.GetFilmsWithPagingAndSorting(new PageAndSortParameters());
+        List<FilmListSlower> films = sut.GetFilmsWithPagingAndSorting(new PageAndSortParameters());
         
         // Assert
         films.Should().HaveCount(10);
         
         
         // Act
-        var filmsPage2 = sut.GetFilmsWithPagingAndSorting(new PageAndSortParameters() {Page = 1, SortDirection = "DESC"});
+        List<FilmListSlower> filmsPage2 = sut.GetFilmsWithPagingAndSorting(new PageAndSortParameters() {Page = 1, SortDirection = "DESC"});
         
         // Assert
         filmsPage2.Should().HaveCount(10);
         
         // Act
-        var filmsPage3 = sut.GetFilmsWithPagingAndSorting(new PageAndSortParameters() {Page = 2, SortColumn = "title"});
+        List<FilmListSlower> filmsPage3 = sut.GetFilmsWithPagingAndSorting(new PageAndSortParameters() {Page = 2, SortColumn = "title"});
         filmsPage2.Should().HaveCount(10);
     }
 
@@ -533,11 +534,11 @@ public class Examples2
     public void GetFilmsWithPagingAndSortingWithParametersAndObjectShouldBeTheSame()
     {
         // Arrange
-        var sut = new Examples2();
+        Examples2 sut = new Examples2();
         
         // Act
-        var films = sut.GetFilmListSlowerWithPagingAndSorting();
-        var filmsParametersObject = sut.GetFilmsWithPagingAndSorting(new PageAndSortParameters());
+        List<FilmListSlower> films = sut.GetFilmListSlowerWithPagingAndSorting();
+        List<FilmListSlower> filmsParametersObject = sut.GetFilmsWithPagingAndSorting(new PageAndSortParameters());
 
         films.Should().BeEquivalentTo(filmsParametersObject);
         
@@ -546,8 +547,8 @@ public class Examples2
         
         
         // Act
-        var filmsPage2 = sut.GetFilmListSlowerWithPagingAndSorting(page: 1, sortDirection: "DESC");
-        var filmsPage2ParametersObject = sut.GetFilmsWithPagingAndSorting(new PageAndSortParameters() {Page = 1, SortDirection = "DESC"});
+        List<FilmListSlower> filmsPage2 = sut.GetFilmListSlowerWithPagingAndSorting(page: 1, sortDirection: "DESC");
+        List<FilmListSlower> filmsPage2ParametersObject = sut.GetFilmsWithPagingAndSorting(new PageAndSortParameters() {Page = 1, SortDirection = "DESC"});
         
         filmsPage2.Should().BeEquivalentTo(filmsPage2ParametersObject);
         
@@ -555,8 +556,8 @@ public class Examples2
         filmsPage2.Should().HaveCount(10);
         
         // Act
-        var filmsPage3 = sut.GetFilmListSlowerWithPagingAndSorting(page: 2, sortColumn: "title");
-        var filmsPage3ParametersObject = sut.GetFilmsWithPagingAndSorting(new PageAndSortParameters() {Page = 2, SortColumn = "title"});
+        List<FilmListSlower> filmsPage3 = sut.GetFilmListSlowerWithPagingAndSorting(page: 2, sortColumn: "title");
+        List<FilmListSlower> filmsPage3ParametersObject = sut.GetFilmsWithPagingAndSorting(new PageAndSortParameters() {Page = 2, SortColumn = "title"});
         
         filmsPage3.Should().BeEquivalentTo(filmsPage3ParametersObject);
         
@@ -565,8 +566,8 @@ public class Examples2
 
     public List<FilmListSlower> FilmsWithSqlBuilder()
     {
-        using var connection = new MySqlConnection(GetConnectionString());
-        var sqlBuilder = new SqlBuilder();
+        using MySqlConnection connection = new MySqlConnection(ConnectionString);
+        SqlBuilder sqlBuilder = new SqlBuilder();
         sqlBuilder.Select("title as Title")
             .Select("category as Category")
             .Where("length > @Length", new { Length = 120 })
@@ -576,10 +577,10 @@ public class Examples2
             .AddParameters(new { PageSize = 10, Offset = 0 });
             
         
-        var template = sqlBuilder.AddTemplate("SELECT /**select**/ FROM nicer_but_slower_film_list /**where**/ /**orderby**/ LIMIT @PageSize OFFSET @Offset");
+        SqlBuilder.Template? template = sqlBuilder.AddTemplate("SELECT /**select**/ FROM nicer_but_slower_film_list /**where**/ /**orderby**/ LIMIT @PageSize OFFSET @Offset");
         
         
-        var films = connection.Query<FilmListSlower>(template.RawSql, template.Parameters);
+        IEnumerable<FilmListSlower> films = connection.Query<FilmListSlower>(template.RawSql, template.Parameters);
         return films.ToList();
     } 
     
@@ -587,10 +588,10 @@ public class Examples2
     public void FilmsWithSqlBuilderTest()
     {
         // Arrange
-        var sut = new Examples2();
+        Examples2 sut = new Examples2();
         
         // Act
-        var films = sut.FilmsWithSqlBuilder();
+        List<FilmListSlower> films = sut.FilmsWithSqlBuilder();
         
         // Assert
         films.Should().HaveCount(10);
@@ -610,29 +611,29 @@ public class Examples2
     
     public List<FilmListSlower> GetFilmsWithSqlBuilderAndParameters(QueryParameters queryParameters)
     {
-        using var connection = new MySqlConnection(GetConnectionString());
-        var sqlBuilder = new SqlBuilder();
+        using MySqlConnection connection = new MySqlConnection(ConnectionString);
+        SqlBuilder sqlBuilder = new SqlBuilder();
         
-        foreach (var selectColumn in queryParameters.SelectColumns)
+        foreach (string selectColumn in queryParameters.SelectColumns)
         {
             sqlBuilder.Select(selectColumn);
         }
 
-        foreach (var whereColumn in queryParameters.WhereColumns)
+        foreach ((string, object) whereColumn in queryParameters.WhereColumns)
         {
             sqlBuilder.Where(whereColumn.Item1, whereColumn.Item2);
         }
         
-        foreach (var orderByColumn in queryParameters.OrderByColumns)
+        foreach (string orderByColumn in queryParameters.OrderByColumns)
         {
             sqlBuilder.OrderBy(orderByColumn);
         }
         
         sqlBuilder.AddParameters(new { PageSize = queryParameters.PageSize, Offset = queryParameters.Offset });
         
-        var template = sqlBuilder.AddTemplate("SELECT /**select**/ FROM nicer_but_slower_film_list /**where**/ /**orderby**/ LIMIT @PageSize OFFSET @Offset");
+        SqlBuilder.Template? template = sqlBuilder.AddTemplate("SELECT /**select**/ FROM nicer_but_slower_film_list /**where**/ /**orderby**/ LIMIT @PageSize OFFSET @Offset");
         
-        var films = connection.Query<FilmListSlower>(template.RawSql, template.Parameters);
+        IEnumerable<FilmListSlower> films = connection.Query<FilmListSlower>(template.RawSql, template.Parameters);
         return films.ToList();
     }
     
@@ -640,10 +641,10 @@ public class Examples2
     public void GetFilmsWithSqlBuilderAndParametersTest()
     {
         // Arrange
-        var sut = new Examples2();
+        Examples2 sut = new Examples2();
         
         
-        var queryParameters = new QueryParameters()
+        QueryParameters queryParameters = new QueryParameters()
         {
             SelectColumns = new List<string>() {"title as Title", "category as Category"},
             WhereColumns = new List<(string, object)>() {("length > @Length", new { Length = 120 }), ("rating = @Rating", new { Rating = "PG-13" })},
@@ -653,7 +654,7 @@ public class Examples2
         };
         
         // Act
-        var films = sut.GetFilmsWithSqlBuilderAndParameters(queryParameters);
+        List<FilmListSlower> films = sut.GetFilmsWithSqlBuilderAndParameters(queryParameters);
         
         // Assert
         films.Should().HaveCount(10);

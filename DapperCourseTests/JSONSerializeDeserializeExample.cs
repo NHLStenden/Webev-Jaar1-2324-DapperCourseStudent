@@ -55,7 +55,7 @@ public class JsonSerializeDeserializeExample
     
     public void SerializeAsJson()
     {
-        var country = new Country
+        Country country = new Country
         {
             CountryId = 1,
             Name = "Afghanistan",

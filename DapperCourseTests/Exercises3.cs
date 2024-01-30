@@ -5,13 +5,8 @@ using MySqlConnector;
 
 namespace DapperCourseTests;
 
-public class ExercisesRelationships
+public class Exercises3
 {
-    private static string GetConnectionString()
-    {
-        return "Server=localhost;port=3306;Database=sakila;Uid=root;Pwd=Test@1234!";
-    }
-
     //In this exercise we will use the sakila database to practice with relationships.
     //Each payment has one customer
     //Create a query that returns all payments with the customer information
@@ -58,8 +53,8 @@ public class ExercisesRelationships
 
     public List<Payment> ExerciseOneToOne()
     {
-        using var connection = new MySqlConnection(GetConnectionString());
-        var result = connection.Query<Payment, Customer, Payment>(
+        using MySqlConnection connection = new MySqlConnection(ConnectionStrings.GetConnectionStringSakila());
+        IEnumerable<Payment> result = connection.Query<Payment, Customer, Payment>(
             $@"
             SELECT payment_id AS {nameof(Payment.PaymentId)}, 
                     p.customer_id AS {nameof(Payment.CustomerId)},
@@ -88,7 +83,7 @@ public class ExercisesRelationships
     [Test]
     public void TestExerciseOneToOne()
     {
-        var payments = ExerciseOneToOne();
+        List<Payment> payments = ExerciseOneToOne();
         payments.Should().HaveCount(16044);
 
         payments.First().Amount.Should().Be(2.99m);
@@ -119,8 +114,8 @@ public class ExercisesRelationships
     // The address table has a one to one relationship with the customer table.
     public List<Payment> ExerciseOneToOneTwoJoins()
     {
-        using var connection = new MySqlConnection(GetConnectionString());
-        var result = connection.Query<Payment, Customer, Address, Payment>(
+        using MySqlConnection connection = new MySqlConnection(ConnectionStrings.GetConnectionStringSakila());
+        IEnumerable<Payment> result = connection.Query<Payment, Customer, Address, Payment>(
             $@"
             SELECT payment_id AS {nameof(Payment.PaymentId)}, 
                     p.customer_id AS {nameof(Payment.CustomerId)},
@@ -155,7 +150,7 @@ public class ExercisesRelationships
     [Test]
     public void TestExerciseOneToOne2Joins()
     {
-        var payments = ExerciseOneToOneTwoJoins();
+        List<Payment> payments = ExerciseOneToOneTwoJoins();
         payments.Should().HaveCount(16044);
 
         payments.First().Amount.Should().Be(2.99m);
@@ -206,7 +201,7 @@ public class ExercisesRelationships
 
     public List<Store> ExerciseOneToManyWithDictionaryMethod()
     {
-        using var connection = new MySqlConnection(GetConnectionString());
+        using MySqlConnection connection = new MySqlConnection(ConnectionStrings.GetConnectionStringSakila());
 
         string sql = $@"
             SELECT s.store_id AS {nameof(Store.StoreId)},
@@ -223,11 +218,11 @@ public class ExercisesRelationships
             ORDER BY s.store_id, c.customer_id
             LIMIT 10";
 
-        var dictionary = new Dictionary<int, Store>();
-        var result = connection.Query<Store, Customer, Store>(sql
+        Dictionary<int, Store> dictionary = new Dictionary<int, Store>();
+        IEnumerable<Store> result = connection.Query<Store, Customer, Store>(sql
             , (store, customer) =>
             {
-                if (!dictionary.TryGetValue(store.StoreId, out var storeEntry))
+                if (!dictionary.TryGetValue(store.StoreId, out Store? storeEntry))
                 {
                     storeEntry = store;
                     storeEntry.Customers = new List<Customer>();
@@ -243,7 +238,7 @@ public class ExercisesRelationships
     [Test]
     public async Task TestExerciseOneToManyWithDictionaryMethod()
     {
-        var stores = ExerciseOneToManyWithDictionaryMethod();
+        List<Store> stores = ExerciseOneToManyWithDictionaryMethod();
         stores.Should().HaveCount(1);
 
         stores.First().Customers.Should().HaveCount(10);
@@ -274,7 +269,7 @@ public class ExercisesRelationships
     //  this can be used when you views that return Json Objects and you want to merge them into one Json Object.
     private List<Store> ExerciseOneToManyWithJsonMethod()
     {
-        using var connection = new MySqlConnection(GetConnectionString());
+        using MySqlConnection connection = new MySqlConnection(ConnectionStrings.GetConnectionStringSakila());
 
         string sql = $@"
             SELECT JSON_OBJECT('StoreId', s.store_id,
@@ -296,11 +291,11 @@ public class ExercisesRelationships
             ORDER BY s.store_id
             LIMIT 10";
 
-        var result = new List<Store>();
-        var jsonResult = connection.Query<string>(sql);
-        foreach (var jsonObjStr in jsonResult)
+        List<Store> result = new List<Store>();
+        IEnumerable<string> jsonResult = connection.Query<string>(sql);
+        foreach (string jsonObjStr in jsonResult)
         {
-            var store = JsonSerializer.Deserialize<Store>(jsonObjStr);
+            Store? store = JsonSerializer.Deserialize<Store>(jsonObjStr);
             result.Add(store);
         }
 
@@ -310,7 +305,7 @@ public class ExercisesRelationships
     [Test]
     public async Task ExerciseOneToManyJsonTest()
     {
-        var stores = ExerciseOneToManyWithJsonMethod();
+        List<Store> stores = ExerciseOneToManyWithJsonMethod();
         stores.Should().HaveCount(2);
 
 
@@ -351,12 +346,12 @@ public class ExercisesRelationships
                          LIMIT 5
                      """;
 
-        using var connection = new MySqlConnection(GetConnectionString());
-        var dictionary = new Dictionary<int, Film>();
-        var result = connection.Query<Film, Actor, Film>(sql
+        using MySqlConnection connection = new MySqlConnection(ConnectionStrings.GetConnectionStringSakila());
+        Dictionary<int, Film> dictionary = new Dictionary<int, Film>();
+        IEnumerable<Film> result = connection.Query<Film, Actor, Film>(sql
             , (film, actor) =>
             {
-                if (!dictionary.TryGetValue(film.FilmId, out var filmEntry))
+                if (!dictionary.TryGetValue(film.FilmId, out Film? filmEntry))
                 {
                     filmEntry = film;
                     filmEntry.Actors = new List<Actor>();
@@ -374,7 +369,7 @@ public class ExercisesRelationships
     public async Task GetFilmsIncludeActorsTest()
     {
         //Arrange & Act
-        var films = GetFilmsIncludeActorsDictionaryMethod();
+        List<Film> films = GetFilmsIncludeActorsDictionaryMethod();
 
         films.Should().HaveCount(1);
         films.First().Actors.Should().HaveCount(5);
@@ -409,12 +404,12 @@ public class ExercisesRelationships
                      LIMIT 5
                      """;
         
-        using var connection = new MySqlConnection(GetConnectionString());
-        var result = connection.Query<string>(sql);
-        var films = new List<Film>();
-        foreach (var jsonObjStr in result)
+        using MySqlConnection connection = new MySqlConnection(ConnectionStrings.GetConnectionStringSakila());
+        IEnumerable<string> result = connection.Query<string>(sql);
+        List<Film> films = new List<Film>();
+        foreach (string jsonObjStr in result)
         {
-            var film = JsonSerializer.Deserialize<Film>(jsonObjStr);
+            Film? film = JsonSerializer.Deserialize<Film>(jsonObjStr);
             films.Add(film);
         }
 
@@ -425,7 +420,7 @@ public class ExercisesRelationships
     public async Task GetFilmsIncludeActorsJsonTest()
     {
         //Arrange & Act
-        var films = GetFilmsIncludeActorsJsonMethod();
+        List<Film> films = GetFilmsIncludeActorsJsonMethod();
 
         //Assert
         films.Should().HaveCount(1);

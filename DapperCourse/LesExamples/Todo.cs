@@ -1,7 +1,7 @@
 using Dapper;
 using MySqlConnector;
 
-namespace DapperCourse.TodoExample;
+namespace DapperCourse.LesExamples;
 
 public class Todo
 {

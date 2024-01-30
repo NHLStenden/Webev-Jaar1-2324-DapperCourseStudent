@@ -39,7 +39,7 @@ public class Exercises1
     
     public bool Exercise0()
     {
-        using var connection = new MySqlConnection(GetConnectionString());
+        using MySqlConnection connection = new MySqlConnection(GetConnectionString());
         connection.Open();
         bool result = connection.QuerySingle<bool>("SELECT 1 = 1");
         return result;
@@ -49,7 +49,7 @@ public class Exercises1
     public void Exercise0Test()
     {
         // Arrange
-        var sut = new Exercises1();
+        Exercises1 sut = new Exercises1();
         
         // Act
         bool result = sut.Exercise0();
@@ -75,8 +75,8 @@ public class Exercises1
     {
         string sql = "SELECT COUNT(*) FROM Movies";
         
-        using var connection = new MySqlConnection(GetConnectionString());
-        var count = connection.ExecuteScalar(sql);
+        using MySqlConnection connection = new MySqlConnection(GetConnectionString());
+        object? count = connection.ExecuteScalar(sql);
         return Convert.ToInt32(count);
     }
     
@@ -84,7 +84,7 @@ public class Exercises1
     public void ExerciseScalar1Test()
     {
         // Arrange
-        var sut = new Exercises1();
+        Exercises1 sut = new Exercises1();
         
         // Act
         int count = sut.ExerciseScalar1();
@@ -99,8 +99,8 @@ public class Exercises1
     public int ExerciseScalar2()
     {
         string sql = "SELECT COUNT(*) FROM Actors WHERE Gender = 'F' ";
-        using var connection = new MySqlConnection(GetConnectionString());
-        var count = connection.ExecuteScalar<int>(sql);
+        using MySqlConnection connection = new MySqlConnection(GetConnectionString());
+        int count = connection.ExecuteScalar<int>(sql);
         return count;
     }
     
@@ -108,7 +108,7 @@ public class Exercises1
     public void ExerciseScalar2Test()
     {
         // Arrange
-        var sut = new Exercises1();
+        Exercises1 sut = new Exercises1();
         
         // Act
         int count = sut.ExerciseScalar2();
@@ -124,8 +124,8 @@ public class Exercises1
     public bool ExerciseScalar3()
     {
         string sql = "SELECT COUNT(*) > 0 FROM Reviewers WHERE Name IS NULL OR Name = ''";
-        using var connection = new MySqlConnection(GetConnectionString());
-        var count = connection.ExecuteScalar<bool>(sql);
+        using MySqlConnection connection = new MySqlConnection(GetConnectionString());
+        bool count = connection.ExecuteScalar<bool>(sql);
         return count;
     }
     
@@ -133,7 +133,7 @@ public class Exercises1
     public void ExerciseScalar3Test()
     {
         // Arrange
-        var sut = new Exercises1();
+        Exercises1 sut = new Exercises1();
         
         // Act
         bool result = sut.ExerciseScalar3();
@@ -146,8 +146,8 @@ public class Exercises1
     public int ExerciseScalar4()
     {
         string sql = "SELECT COUNT(*) FROM Ratings WHERE Stars > 8.5";
-        using var connection = new MySqlConnection(GetConnectionString());
-        var count = connection.ExecuteScalar<int>(sql);
+        using MySqlConnection connection = new MySqlConnection(GetConnectionString());
+        int count = connection.ExecuteScalar<int>(sql);
         return count;
     }
     
@@ -155,7 +155,7 @@ public class Exercises1
     public void ExerciseScalar4Test()
     {
         // Arrange
-        var sut = new Exercises1();
+        Exercises1 sut = new Exercises1();
         
         // Act
         int count = sut.ExerciseScalar4();
@@ -170,8 +170,8 @@ public class Exercises1
     {
         string sql = @"SELECT CONCAT(FirstName, ' ', LastName) FROM Actors WHERE ActorId = 
                             (SELECT ActorId FROM MovieCasts GROUP BY ActorId ORDER BY COUNT(*) DESC LIMIT 1)";
-        using var connection = new MySqlConnection(GetConnectionString());
-        var name = connection.ExecuteScalar<string>(sql);
+        using MySqlConnection connection = new MySqlConnection(GetConnectionString());
+        string? name = connection.ExecuteScalar<string>(sql);
         return name;
     }
     
@@ -179,7 +179,7 @@ public class Exercises1
     public void ExerciseScalar5Test()
     {
         // Arrange
-        var sut = new Exercises1();
+        Exercises1 sut = new Exercises1();
         
         // Act
         string name = sut.ExerciseScalar5();
@@ -197,8 +197,8 @@ public class Exercises1
                         GROUP BY Title
                         ORDER BY AVG(Stars) DESC
                         LIMIT 1";
-        using var connection = new MySqlConnection(GetConnectionString());
-        var title = connection.ExecuteScalar<string>(sql);
+        using MySqlConnection connection = new MySqlConnection(GetConnectionString());
+        string? title = connection.ExecuteScalar<string>(sql);
         return title;
     }
     
@@ -206,7 +206,7 @@ public class Exercises1
     public void ExerciseScalar6Test()
     {
         // Arrange
-        var sut = new Exercises1();
+        Exercises1 sut = new Exercises1();
         
         // Act
         string title = sut.ExerciseScalar6();
@@ -234,8 +234,8 @@ public class Exercises1
     public QuerySingleResult1 ExercisesQuerySingle()
     {
         string sql = "SELECT FirstName, LastName FROM Actors WHERE ActorId = 101";
-        using var connection = new MySqlConnection(GetConnectionString());
-        var actor = connection.QuerySingle<QuerySingleResult1>(sql);
+        using MySqlConnection connection = new MySqlConnection(GetConnectionString());
+        QuerySingleResult1 actor = connection.QuerySingle<QuerySingleResult1>(sql);
         return actor;
     }
     
@@ -243,10 +243,10 @@ public class Exercises1
     public void ExercisesQuerySingleTest()
     {
         // Arrange
-        var sut = new Exercises1();
+        Exercises1 sut = new Exercises1();
         
         // Act
-        var actor = sut.ExercisesQuerySingle();
+        QuerySingleResult1 actor = sut.ExercisesQuerySingle();
         
         // Assert
         actor.FirstName.Should().Be("James");
@@ -272,8 +272,8 @@ public class Exercises1
                             JOIN DirectorMovie dm ON d.DirectorId = dm.DirectorsDirectorId 
                                 JOIN Movies m ON dm.MoviesMovieId = m.MovieId 
                         WHERE m.Title = 'American Beauty'";
-        using var connection = new MySqlConnection(GetConnectionString());
-        var movie = connection.QuerySingle<QuerySingleResult2>(sql);
+        using MySqlConnection connection = new MySqlConnection(GetConnectionString());
+        QuerySingleResult2 movie = connection.QuerySingle<QuerySingleResult2>(sql);
         return movie;
     }
     
@@ -281,10 +281,10 @@ public class Exercises1
     public void ExercisesQuerySingle2Test()
     {
         // Arrange
-        var exercises1 = new Exercises1();
+        Exercises1 exercises1 = new Exercises1();
         
         // Act
-        var movie = exercises1.ExercisesQuerySingle2();
+        QuerySingleResult2 movie = exercises1.ExercisesQuerySingle2();
         
         // Assert
         movie.FirstName.Should().Be("Sam");
@@ -305,8 +305,8 @@ public class Exercises1
     public QuerySingleResult3 ExerciseQuerySingle3()
     {
         string sql = "SELECT Title FROM Movies WHERE Title = 'Does not exist'";
-        using var connection = new MySqlConnection(GetConnectionString());
-        var result = connection.QuerySingle<QuerySingleResult3>(sql);
+        using MySqlConnection connection = new MySqlConnection(GetConnectionString());
+        QuerySingleResult3 result = connection.QuerySingle<QuerySingleResult3>(sql);
         return result;
     }
     
@@ -314,7 +314,7 @@ public class Exercises1
     public void ExerciseQuerySingle3Test()
     {
         // Arrange
-        var sut = new Exercises1();
+        Exercises1 sut = new Exercises1();
         
         // Act & Assert
         Assert.Catch(() => sut.ExerciseQuerySingle3());
@@ -334,8 +334,8 @@ public class Exercises1
     public QuerySingleOrDefaultResult1 ExerciseQuerySingleOrDefault1()
     {
         string sql = "SELECT Title FROM Movies WHERE Title = 'Does not exist'";
-        using var connection = new MySqlConnection(GetConnectionString());
-        var result = connection.QuerySingleOrDefault<QuerySingleOrDefaultResult1>(sql);
+        using MySqlConnection connection = new MySqlConnection(GetConnectionString());
+        QuerySingleOrDefaultResult1? result = connection.QuerySingleOrDefault<QuerySingleOrDefaultResult1>(sql);
         return result;
     }
     
@@ -343,10 +343,10 @@ public class Exercises1
     public void ExerciseQuerySingleOrDefault1Test()
     {
         // Arrange
-        var sut = new Exercises1();
+        Exercises1 sut = new Exercises1();
         
         // Act
-        var result = sut.ExerciseQuerySingleOrDefault1();
+        QuerySingleOrDefaultResult1 result = sut.ExerciseQuerySingleOrDefault1();
         
         // Assert
         result.Should().BeNull();
@@ -368,8 +368,8 @@ public class Exercises1
     public ExerciseQueryFirst1 ExerciseQueryFirst()
     {
         string sql = "SELECT Title, Language FROM Movies WHERE Language = 'English' ORDER BY Title";
-        using var connection = new MySqlConnection(GetConnectionString());
-        var result = connection.QueryFirst<ExerciseQueryFirst1>(sql);
+        using MySqlConnection connection = new MySqlConnection(GetConnectionString());
+        ExerciseQueryFirst1 result = connection.QueryFirst<ExerciseQueryFirst1>(sql);
         return result;
     }
     
@@ -377,10 +377,10 @@ public class Exercises1
     public void ExerciseQueryFirstTest()
     {
         // Arrange
-        var sut = new Exercises1();
+        Exercises1 sut = new Exercises1();
         
         // Act
-        var result = sut.ExerciseQueryFirst();
+        ExerciseQueryFirst1 result = sut.ExerciseQueryFirst();
         
         // Assert
         result.Title.Should().Be("Aliens"); // good movie :-)
@@ -392,8 +392,8 @@ public class Exercises1
     // Don't worry about the return type, we will fix that in the next exercise.
     public IEnumerable<dynamic> ExerciseQueryDynamic()
     {
-        using var connection = new MySqlConnection(GetConnectionString());
-        var movies = connection.Query("SELECT Title, Year FROM Movies ORDER BY Title LIMIT 10");
+        using MySqlConnection connection = new MySqlConnection(GetConnectionString());
+        IEnumerable<dynamic> movies = connection.Query("SELECT Title, Year FROM Movies ORDER BY Title LIMIT 10");
         return movies;
     }
     
@@ -401,10 +401,10 @@ public class Exercises1
     public Task ExerciseQueryDynamicTest()
     {
         // Arrange
-        var sut = new Exercises1();
+        Exercises1 sut = new Exercises1();
         
         // Act
-        var movies = sut.ExerciseQueryDynamic();
+        IEnumerable<dynamic> movies = sut.ExerciseQueryDynamic();
         
         // Assert
         movies.Should().HaveCount(10);
@@ -424,12 +424,12 @@ public class Exercises1
     
     public IEnumerable<ResultExerciseQuery> ExerciseQuery()
     {
-        var sql = """
-                      SELECT Title, Year FROM Movies ORDER BY Title LIMIT 10
-                  """;
+        string sql = """
+                         SELECT Title, Year FROM Movies ORDER BY Title LIMIT 10
+                     """;
             
-        using var connection = new MySqlConnection(GetConnectionString());
-        var movies = connection.Query<ResultExerciseQuery>(sql);
+        using MySqlConnection connection = new MySqlConnection(GetConnectionString());
+        IEnumerable<ResultExerciseQuery> movies = connection.Query<ResultExerciseQuery>(sql);
         return movies;
     }
     
@@ -437,10 +437,10 @@ public class Exercises1
     public Task ExerciseQueryTest()
     {
         // Arrange
-        var sut = new Exercises1();
+        Exercises1 sut = new Exercises1();
         
         // Act
-        var movies = sut.ExerciseQuery();
+        IEnumerable<ResultExerciseQuery> movies = sut.ExerciseQuery();
         
         // Assert
         movies.Should().HaveCount(10);
@@ -462,8 +462,8 @@ public class Exercises1
                  WHERE d.FirstName = 'Kevin' AND d.LastName = 'Spacey' ORDER BY Title
             """;
         
-        using var connection = new MySqlConnection(GetConnectionString());
-        var titles = connection.Query<string>(sql).ToList();
+        using MySqlConnection connection = new MySqlConnection(GetConnectionString());
+        List<string> titles = connection.Query<string>(sql).ToList();
         return titles;
     }
     
@@ -471,10 +471,10 @@ public class Exercises1
     public void ExerciseQuery2Test()
     {
         // Arrange
-        var sut = new Exercises1();
+        Exercises1 sut = new Exercises1();
         
         // Act
-        var titles = sut.ExerciseQuery2();
+        List<string> titles = sut.ExerciseQuery2();
         
         // Assert
         titles.Should().ContainInOrder("Beyond the Sea");
@@ -502,8 +502,8 @@ public class Exercises1
         string sql = @"SELECT Title, Year, Duration, Language, ReleaseDate, ReleaseCountryCode
                         FROM Movies WHERE MovieId = @movieId";
         
-        using var connection = new MySqlConnection(GetConnectionString());
-        var movies = connection.QuerySingle<Movie>(sql, new { movieId });
+        using MySqlConnection connection = new MySqlConnection(GetConnectionString());
+        Movie movies = connection.QuerySingle<Movie>(sql, new { movieId });
         return movies;
     }
     
@@ -511,10 +511,10 @@ public class Exercises1
     public void GetMovieByIdTest()
     {
         // Arrange
-        var sut = new Exercises1();
+        Exercises1 sut = new Exercises1();
         
         // Act
-        var movie = sut.GetMovieById(922);
+        Movie movie = sut.GetMovieById(922);
         
         // Assert
         movie.Title.Should().Be("Aliens");
@@ -535,8 +535,8 @@ public class Exercises1
         string sql = @"SELECT Title, Year, Duration, Language, ReleaseDate, ReleaseCountryCode
                         FROM Movies WHERE MovieId = @movieId";
         
-        using var connection = new MySqlConnection(GetConnectionString());
-        var movies = connection.QuerySingleOrDefault<Movie>(sql, new { movieId });
+        using MySqlConnection connection = new MySqlConnection(GetConnectionString());
+        Movie? movies = connection.QuerySingleOrDefault<Movie>(sql, new { movieId });
         return movies;
     }
     
@@ -544,10 +544,10 @@ public class Exercises1
     public void GetMovieById2Test()
     {
         // Arrange
-        var sut = new Exercises1();
+        Exercises1 sut = new Exercises1();
         
         // Act
-        var movie = sut.GetMovieById2(922);
+        Movie? movie = sut.GetMovieById2(922);
         
         // Assert
         movie.Should().NotBeNull();
@@ -557,7 +557,7 @@ public class Exercises1
         movie.Language.Should().Be("English");
         movie.ReleaseDate.Should().Be(new DateTime(1986, 8, 29));
         
-        var movie2 = sut.GetMovieById2(999999);
+        Movie? movie2 = sut.GetMovieById2(999999);
         movie2.Should().BeNull();
     }
 }

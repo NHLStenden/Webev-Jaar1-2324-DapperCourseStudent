@@ -3,11 +3,16 @@ using MySqlConnector;
 
 namespace DapperCourseTests;
 
-public class Examples3_1to1Relationships
+public class Examples31To1Relationships
 {
     // https://medium.com/dapper-net/multiple-mapping-d36c637d14fa
     // https://dapper-tutorial.net/querymultiple
 
+    private static readonly string ConnectionString;
+    static Examples31To1Relationships()
+    {
+        ConnectionString = ConnectionStrings.GetConnectionStringSakila();
+    }
     
     public class Customer
     {
@@ -48,10 +53,7 @@ public class Examples3_1to1Relationships
         public DateTime LastUpdate { get; set; }
     }
     
-    private static string GetConnectionStringForShop()
-    {
-        return "Server=localhost;port=3306;Database=sakila;Uid=root;Pwd=Test@1234!";
-    }
+
     
     //This query will return all the customers, to load the address we have to execute a query for each customer.
     //Foreach customer we have to execute a query to get the address from the database. This is done in the foreach loop.
@@ -72,23 +74,23 @@ public class Examples3_1to1Relationships
              ORDER BY customer_id
              LIMIT 3
              """;
-        using var connection = new MySqlConnection(GetConnectionStringForShop());
-        var customers = connection.Query<Customer>(sql)
+        using MySqlConnection connection = new MySqlConnection(ConnectionString);
+        List<Customer> customers = connection.Query<Customer>(sql)
             .ToList();  //1 Query
-        foreach (var customer in customers) // N Queries
+        foreach (Customer customer in customers) // N Queries
         {
-            var sqlAddress = """
-                      SELECT    address_id AS AddressId, address AS Address1, address2 AS Address2, district AS District,
-                                city_id AS CityId, postal_code AS PostalCode, phone AS Phone, 
-                                -- location AS Location, 
-                                last_update AS LastUpdate
-                      FROM address 
-                      WHERE address_id = @AddressId
-                      """;
+            string sqlAddress = """
+                                SELECT    address_id AS AddressId, address AS Address1, address2 AS Address2, district AS District,
+                                          city_id AS CityId, postal_code AS PostalCode, phone AS Phone,
+                                          -- location AS Location,
+                                          last_update AS LastUpdate
+                                FROM address
+                                WHERE address_id = @AddressId
+                                """;
             
             //Every time we execute this query, we have to go to the database and get the address.
             //This is called the N+1 problem, because we have 1 query to get the customers and N queries to get the addresses.
-            var address = connection.QuerySingle<Address>(sqlAddress, new
+            Address address = connection.QuerySingle<Address>(sqlAddress, new
             {
                 AddressId = customer.AddressId
             });
@@ -102,10 +104,10 @@ public class Examples3_1to1Relationships
     public async Task GetCustomersWithAddressNPlusOneProblemTest()
     {
         // Arrange
-        var sut = new Examples3_1to1Relationships();
+        Examples31To1Relationships sut = new Examples31To1Relationships();
         
         // Act
-        var customers = sut.GetCustomersWithAddressNPlusOneProblem();
+        List<Customer> customers = sut.GetCustomersWithAddressNPlusOneProblem();
         
         // Assert
         await Verify(customers);
@@ -155,7 +157,7 @@ public class Examples3_1to1Relationships
                 LIMIT 3
             """;
         
-        using var connection = new MySqlConnection(GetConnectionStringForShop());
+        using MySqlConnection connection = new MySqlConnection(ConnectionString);
         IEnumerable<Customer> customers = connection.Query<Customer, Address, Customer>(sql, 
             map: (customer, address) =>
             {
@@ -170,10 +172,10 @@ public class Examples3_1to1Relationships
     public async Task GetCustomerIncludeAddressTest()
     {
         // Arrange
-        var sut = new Examples3_1to1Relationships();
+        Examples31To1Relationships sut = new Examples31To1Relationships();
         
         // Act
-        var customers = sut.GetCustomerIncludeAddress();
+        List<Customer> customers = sut.GetCustomerIncludeAddress();
         
         // Assert
         await Verify(customers);
@@ -222,8 +224,8 @@ public class Examples3_1to1Relationships
                 LIMIT 3
             """;
         
-        using var connection = new MySqlConnection(GetConnectionStringForShop());
-        var customers = connection.Query<Customer, Address, City, Customer>(sql, 
+        using MySqlConnection connection = new MySqlConnection(ConnectionString);
+        IEnumerable<Customer> customers = connection.Query<Customer, Address, City, Customer>(sql, 
             (customer, address, city) =>
             {
                 customer.Address = address;
@@ -237,10 +239,10 @@ public class Examples3_1to1Relationships
     public async Task GetCustomerIncludeAddressIncludeCityTest()
     {
         // Arrange
-        var sut = new Examples3_1to1Relationships();
+        Examples31To1Relationships sut = new Examples31To1Relationships();
         
         // Act
-        var customers = sut.GetCustomerIncludeAddressIncludeCity();
+        List<Customer> customers = sut.GetCustomerIncludeAddressIncludeCity();
         
         // Assert
         await Verify(customers);
@@ -301,8 +303,8 @@ public class Examples3_1to1Relationships
                 LIMIT 3
             """;
         
-        using var connection = new MySqlConnection(GetConnectionStringForShop());
-        var customers = connection.Query<Customer, Address, City, Country, Customer>(sql, 
+        using MySqlConnection connection = new MySqlConnection(ConnectionString);
+        IEnumerable<Customer> customers = connection.Query<Customer, Address, City, Country, Customer>(sql, 
             (customer, address, city, country) =>
             {
                 customer.Address = address;
@@ -320,10 +322,10 @@ public class Examples3_1to1Relationships
     public async Task GetCustomerIncludeAddressIncludeCityIncludeCountryTest()
     {
         // Arrange
-        var sut = new Examples3_1to1Relationships();
+        Examples31To1Relationships sut = new Examples31To1Relationships();
         
         // Act
-        var customers = sut.GetCustomerIncludeAddressIncludeCityIncludeCountry();
+        List<Customer> customers = sut.GetCustomerIncludeAddressIncludeCityIncludeCountry();
         
         // Assert
         await Verify(customers);

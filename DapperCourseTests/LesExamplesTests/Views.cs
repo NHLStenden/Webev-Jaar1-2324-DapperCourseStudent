@@ -8,7 +8,7 @@ public class Views
     [Test]
     public void BierenViews()
     {
-        var bieren = BierExample.GetBrouwersMetAantalBieren();
+        List<BierExample.BrouwerMetAantalBieren> bieren = BierExample.GetBrouwersMetAantalBieren();
         bieren.Should().HaveCount(8);
     }
 }

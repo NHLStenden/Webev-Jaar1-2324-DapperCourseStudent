@@ -5,11 +5,12 @@ using JsonSerializer = System.Text.Json.JsonSerializer;
 
 namespace DapperCourseTests;
 
-public class Examples3_1toNRelationships
+public class Examples3OneToNRelationships
 {
-    private static string GetConnectionStringForShop()
+    private static readonly string ConnectionString;
+    static Examples3OneToNRelationships()
     {
-        return "Server=localhost;port=3306;Database=sakila;Uid=root;Pwd=Test@1234!";
+        ConnectionString = ConnectionStrings.GetConnectionStringSakila();
     }
     
     public class Country
@@ -50,8 +51,8 @@ public class Examples3_1toNRelationships
                 ORDER BY c.country_id
             """;
 
-        using var connection = new MySqlConnection(GetConnectionStringForShop());
-        var countries = connection.Query<Country, City, Country>(sql,
+        using MySqlConnection connection = new MySqlConnection(ConnectionString);
+        IEnumerable<Country> countries = connection.Query<Country, City, Country>(sql,
             (country, city) =>
             {
                 country.Cities = country.Cities ?? new List<City>();
@@ -60,7 +61,7 @@ public class Examples3_1toNRelationships
             }, splitOn: "CitySplit");
 
         //grouping by country
-        var countriesGrouped = countries
+        IEnumerable<Country> countriesGrouped = countries
             .GroupBy(x => x.CountryId)
             .Select(g => new Country()
         {
@@ -76,10 +77,10 @@ public class Examples3_1toNRelationships
     public async Task GetCountriesIncludeCityByGroupingTechniqueTest()
     {
         // Arrange
-        var sut = new Examples3_1toNRelationships();
+        Examples3OneToNRelationships sut = new Examples3OneToNRelationships();
         
         // Act
-        var countries = sut.GetCountriesIncludeCityByGroupingTechnique();
+        List<Country> countries = sut.GetCountriesIncludeCityByGroupingTechnique();
         
         // Assert
         countries.Should().HaveCount(109);
@@ -117,10 +118,10 @@ public class Examples3_1toNRelationships
                 ORDER BY c.country_id
             """;
 
-        var countriesDictionary = new Dictionary<int, Country>();
+        Dictionary<int, Country> countriesDictionary = new Dictionary<int, Country>();
         
-        using var connection = new MySqlConnection(GetConnectionStringForShop());
-        var countries = connection.Query<Country, City, Country>(sql,
+        using MySqlConnection connection = new MySqlConnection(ConnectionString);
+        IEnumerable<Country> countries = connection.Query<Country, City, Country>(sql,
             (country, city) =>
             {
                 if (!countriesDictionary.ContainsKey(country.CountryId))
@@ -141,10 +142,10 @@ public class Examples3_1toNRelationships
     public async Task GetCountriesIncludeCityByDictionaryTest()
     {
         // Arrange
-        var sut = new Examples3_1toNRelationships();
+        Examples3OneToNRelationships sut = new Examples3OneToNRelationships();
         
         // Act
-        var countries = sut.GetCountriesIncludeCityByDictionary();
+        List<Country> countries = sut.GetCountriesIncludeCityByDictionary();
         
         // Assert   
         countries.Should().HaveCount(109);
@@ -157,11 +158,11 @@ public class Examples3_1toNRelationships
     {
         //test if the two techniques are the same (by dictionary and by grouping)
         // Arrange
-        var sut = new Examples3_1toNRelationships();
+        Examples3OneToNRelationships sut = new Examples3OneToNRelationships();
         
         // Act
-        var countriesByDictionary = sut.GetCountriesIncludeCityByDictionary();
-        var countriesByGrouping = sut.GetCountriesIncludeCityByGroupingTechnique();
+        List<Country> countriesByDictionary = sut.GetCountriesIncludeCityByDictionary();
+        List<Country> countriesByGrouping = sut.GetCountriesIncludeCityByGroupingTechnique();
         
         // Assert
         countriesByDictionary.Should().BeEquivalentTo(countriesByGrouping);
@@ -189,12 +190,12 @@ public class Examples3_1toNRelationships
         
         //sort by country id, then we can also do it in one loop (maybe simpler then code below)
         
-        using var connection = new MySqlConnection(GetConnectionStringForShop());
-        var countries = connection.QueryMultiple(sql);
-        var countriesList = countries.Read<Country>().ToList();
-        var citiesList = countries.Read<City>().ToList();
-        var citiesDictionary = citiesList.ToLookup(x => x.CountryId, x => x);
-        var countriesIncludeCity = countriesList.Select(x => new Country()
+        using MySqlConnection connection = new MySqlConnection(ConnectionString);
+        SqlMapper.GridReader countries = connection.QueryMultiple(sql);
+        List<Country> countriesList = countries.Read<Country>().ToList();
+        List<City> citiesList = countries.Read<City>().ToList();
+        ILookup<int, City> citiesDictionary = citiesList.ToLookup(x => x.CountryId, x => x);
+        IEnumerable<Country> countriesIncludeCity = countriesList.Select(x => new Country()
         {
             CountryId = x.CountryId,
             Name = x.Name,
@@ -208,10 +209,10 @@ public class Examples3_1toNRelationships
     public void GetCountriesIncludeCityByQueryMultipleTest()
     {
         // Arrange
-        var sut = new Examples3_1toNRelationships();
+        Examples3OneToNRelationships sut = new Examples3OneToNRelationships();
         
         // Act
-        var countries = sut.GetCountriesIncludeCityByQueryMultiple();
+        List<Country> countries = sut.GetCountriesIncludeCityByQueryMultiple();
         
         // Assert
         countries.Should().HaveCount(109);
@@ -223,12 +224,12 @@ public class Examples3_1toNRelationships
     {
         // Test if the three techniques are the same (by dictionary, by grouping and by query multiple)
         // Arrange
-        var sut = new Examples3_1toNRelationships();
+        Examples3OneToNRelationships sut = new Examples3OneToNRelationships();
         
         // Act
-        var countriesByDictionary = sut.GetCountriesIncludeCityByDictionary();
-        var countriesByGrouping = sut.GetCountriesIncludeCityByGroupingTechnique();
-        var countriesByQueryMultiple = sut.GetCountriesIncludeCityByQueryMultiple();
+        List<Country> countriesByDictionary = sut.GetCountriesIncludeCityByDictionary();
+        List<Country> countriesByGrouping = sut.GetCountriesIncludeCityByGroupingTechnique();
+        List<Country> countriesByQueryMultiple = sut.GetCountriesIncludeCityByQueryMultiple();
         
         // Assert
         countriesByDictionary.Should().BeEquivalentTo(countriesByGrouping);
@@ -252,13 +253,13 @@ public class Examples3_1toNRelationships
                 FROM city ci ORDER BY ci.country_id;
             """;
         
-        using var connection = new MySqlConnection(GetConnectionStringForShop());
-        var countries = connection.QueryMultiple(sql);
-        var countriesList = countries.Read<Country>().ToList();
-        var citiesList = countries.Read<City>().ToList();
+        using MySqlConnection connection = new MySqlConnection(ConnectionString);
+        SqlMapper.GridReader countries = connection.QueryMultiple(sql);
+        List<Country> countriesList = countries.Read<Country>().ToList();
+        List<City> citiesList = countries.Read<City>().ToList();
 
         int idx = 0;
-        foreach (var country in countriesList)
+        foreach (Country country in countriesList)
         {
             country.Cities ??= new List<City>();
 
@@ -281,10 +282,10 @@ public class Examples3_1toNRelationships
     public async Task GetCountriesMergeInLoopTest()
     {
         // Arrange
-        var sut = new Examples3_1toNRelationships();
+        Examples3OneToNRelationships sut = new Examples3OneToNRelationships();
         
         // Act
-        var countries = sut.GetCountriesMergeInLoop();
+        List<Country> countries = sut.GetCountriesMergeInLoop();
         
         // Assert
         countries.Should().HaveCount(109);
@@ -361,13 +362,13 @@ public class Examples3_1toNRelationships
             GROUP BY c1.country_id, c1.country
             ORDER BY c1.country_id
             """;
-        using var connection = new MySqlConnection(GetConnectionStringForShop());
-        var jsonRows = connection.Query<string>(sql);
+        using MySqlConnection connection = new MySqlConnection(ConnectionString);
+        IEnumerable<string> jsonRows = connection.Query<string>(sql);
 
-        var countries = new List<Country?>();
-        foreach (var jsonRow in jsonRows)
+        List<Country> countries = new List<Country?>();
+        foreach (string jsonRow in jsonRows)
         {
-            var country = JsonSerializer.Deserialize<Country>(jsonRow);
+            Country? country = JsonSerializer.Deserialize<Country>(jsonRow);
             countries.Add(country);
         }
 
@@ -382,10 +383,10 @@ public class Examples3_1toNRelationships
     public void GetCountryIncludeCitiesAsJsonTrickTest()
     {
         // Arrange
-        var sut = new Examples3_1toNRelationships();
+        Examples3OneToNRelationships sut = new Examples3OneToNRelationships();
         
         // Act
-        var countries = sut.GetCountryIncludeCitiesAsJsonTrick();
+        List<Country> countries = sut.GetCountryIncludeCitiesAsJsonTrick();
         
         // Assert
         countries.Should().HaveCount(109);

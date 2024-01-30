@@ -4,11 +4,12 @@ using JsonSerializer = System.Text.Json.JsonSerializer;
 
 namespace DapperCourseTests;
 
-public class Examples3_NtoNRelationships
+public class Examples3NtoNRelationships
 {    
-    private static string GetConnectionString()
+    private static readonly string ConnectionString;
+    static Examples3NtoNRelationships()
     {
-        return "Server=localhost;port=3306;Database=sakila;Uid=root;Pwd=Test@1234!";
+        ConnectionString = ConnectionStrings.GetConnectionStringSakila();
     }
 
     public class Film
@@ -26,8 +27,6 @@ public class Examples3_NtoNRelationships
         public string Rating { get; set; } = null!;
         public string SpecialFeatures { get; set; } = null!;
         public DateTime LastUpdate { get; set; }
-
-       
     }
 
 
@@ -75,12 +74,12 @@ public class Examples3_NtoNRelationships
             LIMIT 3
             """;
         
-        using var connection = new MySqlConnection(GetConnectionString());
-        var actorsAsJson = connection.Query<string>(sql);
-        var actors = new List<Actor>();
-        foreach (var actorAsJson in actorsAsJson)
+        using MySqlConnection connection = new MySqlConnection(ConnectionString);
+        IEnumerable<string> actorsAsJson = connection.Query<string>(sql);
+        List<Actor> actors = new List<Actor>();
+        foreach (string actorAsJson in actorsAsJson)
         {
-            var actor = JsonSerializer.Deserialize<Actor>(actorAsJson);
+            Actor actor = JsonSerializer.Deserialize<Actor>(actorAsJson)!;
             actors.Add(actor);
         }
         return actors.ToList();
@@ -90,10 +89,10 @@ public class Examples3_NtoNRelationships
     public async Task GetActorsIncludeFilmsTest()
     {
         // Arrange
-        var sut = new Examples3_NtoNRelationships();
+        Examples3NtoNRelationships sut = new Examples3NtoNRelationships();
         
         // Act
-        var films = sut.GetActorsIncludeFilms();
+        List<Actor> films = sut.GetActorsIncludeFilms();
         
         // Assert
         await Verify(films);
