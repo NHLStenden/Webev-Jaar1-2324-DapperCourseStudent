@@ -253,16 +253,25 @@ public class ExercisesRelationships
     
     //The same as the previous exercise, but now use the JSON method (see examples).
     //The JSON method returns all the customers.
-    //We use GROUP BY in SQL we can not use LIMIT on the aggregated result ( JSON_ARRAYAGG() ).
-    //No solution is perfect, so you can choose which method you prefer.
-    //  -dictionary method
-    //  -json method
+    //We use GROUP BY in SQL we can not use LIMIT, ORDER BY inside the JSON_ARRAYAGG().
+    //This is a problem, actually it works in MariaDB, but not in MySQL!
+    
+    //In my option the JSON method is easier than the Dapper way (dictionary method).
     //What I think is important is that you know both methods.
     //If it's possible avoid complex nested Types as result of Queries anyway.
-    //Better to use a flat result type or 1 to 1 relationships.
+    //It's better to use a flat result type or 1 to 1 relationships.
+    //Remember that it's always a good idea to create a view (abstract away the complexity)
+    //and no complex nested types in the result if possible!
+    //But sometimes you have to deal with complex nested types! That's why I have created these exercises!
     //Or use a view (abstract away the complexity) and no complex nested types in the result.
-    //But sometimes you have to deal with complex nested types! That's why I have created these exercises.
+    //But sometimes you have to deal with complex nested types! That's why I have created these examples.
     //I hope you have learned something from it.
+    
+    //There are three JSON methods that are useful for this:
+    //JSON_OBJECT() --> Create a Json Object which can be deserialized to a C# Type
+    //JSON_ARRAYAGG() --> Create a Json Array which can be deserialized to a List<C# Type> (or other list like types)
+    //JSON_MERGE_PATCH() --> Merge two Json Objects (or more) into one Json Object,
+    //  this can be used when you views that return Json Objects and you want to merge them into one Json Object.
     private List<Store> ExerciseOneToManyWithJsonMethod()
     {
         using var connection = new MySqlConnection(GetConnectionString());
@@ -377,7 +386,15 @@ public class ExercisesRelationships
     }
     
     //The same a the previous exercise, but now use the JSON method (see examples)
-    //Limit the result to 5 rows, no we have all the actors for each film (the order in which they are returned we can not control)
+    //Limit the result to 5 rows, no we have all the actors for each film
+    // (the order in which they are returned we can not control in Mysql,
+    // if you what to use this use MariaDB instead)
+    
+    // Take a look at the examples, a one to many relationship and many to many relationship are actually the same.
+    // This makes sense, because a many to many relationship is a one to many relationship in both directions.
+    // The only difference is that you have to join the in between table.
+    // From the perspective of C# classes both types of relationships (1-1 and 1-many) are the same,
+    // in other words they are both 1 to many relationships and result in a List<T> property (many side).
     public List<Film> GetFilmsIncludeActorsJsonMethod()
     {
         string sql = """

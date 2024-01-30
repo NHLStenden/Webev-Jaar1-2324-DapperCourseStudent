@@ -46,6 +46,7 @@ FROM customer c
             JOIN city ci ON a.city_id = ci.city_id
                 JOIN country co ON ci.country_id = co.country_id;
 
+-- ONLY WORKS IN MARIA DB, SEE BELOW FOR MYSQL
 SELECT JSON_MERGE_PATCH(c.CutsomerObject,
                         JSON_OBJECT('movies',
                                     JSON_ARRAYAGG(DISTINCT f.FilmActorAsJson ORDER BY JSON_EXTRACT(f.FilmActorAsJson, '$.Title')) )) as CustomerObject
@@ -56,7 +57,15 @@ FROM rental r
 WHERE c.customer_id = 19
 GROUP BY c.customer_id;
 
-
+SELECT JSON_MERGE_PATCH(c.CutsomerObject,
+                        JSON_OBJECT('movies',
+                                    JSON_ARRAYAGG(f.FilmActorAsJson ) )) as CustomerObject
+FROM rental r
+         JOIN customersAsJson c on r.customer_id = c.customer_id
+         JOIN inventory  i ON r.inventory_id = i.inventory_id
+         JOIN filmAndActorAsJson f ON i.film_id = f.film_Id
+WHERE c.customer_id = 19
+GROUP BY c.customer_id;
 
 
 SELECT JSON_OBJECT('StoreId', s.store_id,

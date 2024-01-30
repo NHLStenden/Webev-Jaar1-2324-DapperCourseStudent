@@ -10,10 +10,6 @@ public class Examples3_NtoNRelationships
     {
         return "Server=localhost;port=3306;Database=sakila;Uid=root;Pwd=Test@1234!";
     }
-    
-
-
-
 
     public class Film
     {
@@ -102,4 +98,6 @@ public class Examples3_NtoNRelationships
         // Assert
         await Verify(films);
     }
+    
+    
 }
