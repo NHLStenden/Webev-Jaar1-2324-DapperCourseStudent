@@ -47,15 +47,15 @@ FROM customer c
                 JOIN country co ON ci.country_id = co.country_id;
 
 -- ONLY WORKS IN MARIA DB, SEE BELOW FOR MYSQL
-SELECT JSON_MERGE_PATCH(c.CutsomerObject,
-                        JSON_OBJECT('movies',
-                                    JSON_ARRAYAGG(DISTINCT f.FilmActorAsJson ORDER BY JSON_EXTRACT(f.FilmActorAsJson, '$.Title')) )) as CustomerObject
-FROM rental r
-     JOIN customersAsJson c on r.customer_id = c.customer_id
-         JOIN inventory  i ON r.inventory_id = i.inventory_id
-            JOIN filmAndActorAsJson f ON i.film_id = f.film_Id
-WHERE c.customer_id = 19
-GROUP BY c.customer_id;
+# SELECT JSON_MERGE_PATCH(c.CutsomerObject,
+#                         JSON_OBJECT('movies',
+#                                     JSON_ARRAYAGG(DISTINCT f.FilmActorAsJson ORDER BY JSON_EXTRACT(f.FilmActorAsJson, '$.Title')) )) as CustomerObject
+# FROM rental r
+#      JOIN customersAsJson c on r.customer_id = c.customer_id
+#          JOIN inventory  i ON r.inventory_id = i.inventory_id
+#             JOIN filmAndActorAsJson f ON i.film_id = f.film_Id
+# WHERE c.customer_id = 19
+# GROUP BY c.customer_id;
 
 SELECT JSON_MERGE_PATCH(c.CutsomerObject,
                         JSON_OBJECT('movies',
@@ -91,7 +91,9 @@ SELECT JSON_OBJECT('StoreId', s.store_id,
                                                                       ),
                                                               'postalCode', a.postal_code,
                                                               'phone', a.phone)
-                           ) ORDER BY c.last_name  LIMIT 2
+                           )
+                           -- works in maria db not in MSQL :-(
+                           -- ORDER BY c.last_name  LIMIT 2 
                    )
        )
 FROM store s
@@ -101,9 +103,7 @@ FROM store s
          JOIN country co ON ci.country_id = co.country_id
 GROUP BY s.store_id
 ORDER BY s.store_id
-LIMIT 1
-
-
+LIMIT 1;
 
 
 WITH customerCte AS
@@ -127,7 +127,7 @@ SELECT JSON_OBJECT('StoreId', s.store_id,
 FROM store s
          JOIN customerCte as c ON s.store_id = c.store_id
 GROUP BY s.store_id
-ORDER BY s.store_id
+ORDER BY s.store_id;
 
 
 SELECT JSON_OBJECT('StoreId', s.store_id,
@@ -146,8 +146,7 @@ SELECT JSON_OBJECT('StoreId', s.store_id,
 FROM store s
          JOIN customer c ON s.store_id = c.store_id
 GROUP BY s.store_id
-ORDER BY s.store_id
-
+ORDER BY s.store_id;
 
 SELECT JSON_OBJECT('StoreId', s.store_id,
                    'ManagerStaffId', s.manager_staff_id,
@@ -159,22 +158,35 @@ SELECT JSON_OBJECT('StoreId', s.store_id,
                                        'Email', c.email,
                                        'AddressId', c.address_id,
                                        'StoreId', c.store_id
-                           ) ORDER BY c.last_name  LIMIT 3
+                           ) 
+                           -- works in maria db not in MSQL :-(
+                           -- ORDER BY c.last_name  LIMIT 3
                    )
        )
 FROM store s
          JOIN customer c ON s.store_id = c.store_id
 GROUP BY s.store_id
 ORDER BY s.store_id
-LIMIT 1
+LIMIT 1;
 
 
 SELECT JSON_MERGE_PATCH(c.CutsomerObject,
-                        JSON_OBJECT('movies', 
-                                    JSON_ARRAYAGG(DISTINCT f.FilmActorAsJson ORDER BY JSON_EXTRACT(f.FilmActorAsJson, '$.Title')) )) as CustomerObject
+                        JSON_OBJECT('movies',
+                                    JSON_ARRAYAGG(f.FilmActorAsJson ) )) as CustomerObject
 FROM rental r
          JOIN customersAsJson c on r.customer_id = c.customer_id
          JOIN inventory  i ON r.inventory_id = i.inventory_id
          JOIN filmAndActorAsJson f ON i.film_id = f.film_Id
 WHERE c.customer_id = 19
 GROUP BY c.customer_id;
+
+# works in MariaDB
+# SELECT JSON_MERGE_PATCH(c.CutsomerObject,
+#                         JSON_OBJECT('movies', 
+#                                     JSON_ARRAYAGG(DISTINCT f.FilmActorAsJson ORDER BY JSON_EXTRACT(f.FilmActorAsJson, '$.Title')) )) as CustomerObject
+# FROM rental r
+#          JOIN customersAsJson c on r.customer_id = c.customer_id
+#          JOIN inventory  i ON r.inventory_id = i.inventory_id
+#          JOIN filmAndActorAsJson f ON i.film_id = f.film_Id
+# WHERE c.customer_id = 19
+# GROUP BY c.customer_id;
