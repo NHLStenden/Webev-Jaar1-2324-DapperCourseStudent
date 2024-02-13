@@ -94,10 +94,11 @@ public class Exercises1
     {
         string sql = "Select COUNT(*) from actors WHERE Gender = 'F'";
         using MySqlConnection connection = new MySqlConnection(_connectionString);
-        int result = connection.ExecuteScalar<int>(sql);
+        var result = connection.ExecuteScalar<int>(sql);
         return result;
+
     }
-    
+
     [Test]
     public void ExerciseScalar2Test()
     {
@@ -117,7 +118,7 @@ public class Exercises1
     // Write a SQL query to find out.
     public bool ExerciseScalar3()
     {
-        string sql = "Select COUNT(*) from reviewers WHERE Name IS NULL OR name = ''";
+        string sql = """Select COUNT(*) from reviewers WHERE Name IS NULL OR name = "" """;
         using MySqlConnection connection = new MySqlConnection(_connectionString);
         bool result = connection.ExecuteScalar<bool>(sql);
         return result;
@@ -139,7 +140,10 @@ public class Exercises1
     // Write a SQL query to find the number of movies that have a rating higher (stars) than 8.5.
     public int ExerciseScalar4()
     {
-        throw new ArgumentException();
+        string sql = "Select COUNT(*) from ratings WHERE Stars > 8.5";
+        using MySqlConnection connection = new MySqlConnection(_connectionString);
+        int result = connection.ExecuteScalar<int>(sql);
+        return result;
     }
     
     [Test]
@@ -155,11 +159,14 @@ public class Exercises1
         count.Should().Be(1);
     }
     
-    // Write a SQL query to find the actor full name (FirstName + ' ' + LastName) which performs in the most movies.
+    // Write a SQL query to find the actor full name (FirstName , ' ' , LastName) who performs in the most movies.
     // To concatenate strings in MySql use the CONCAT function.
     public string ExerciseScalar5()
     {
-        throw new ArgumentException();
+        string sql = """ SELECT CONCAT(FirstName , " " ,  LastName) FROM actors WHERE ActorId = (SELECT ActorId FROM moviecasts GROUP BY ActorId ORDER BY COUNT(*) DESC LIMIT 1) """;
+        using MySqlConnection connection = new MySqlConnection(_connectionString);
+        string result = connection.ExecuteScalar<string>(sql);
+        return result;
     }
     
     [Test]
@@ -179,7 +186,10 @@ public class Exercises1
     // Which movie (return title) has the highest average rating?
     public string ExerciseScalar6()
     {
-        throw new ArgumentException();
+        string sql = """ SELECT Title FROM movies WHERE MovieId = (SELECT MovieId FROM ratings WHERE MovieId ORDER BY Stars DESC LIMIT 1) """;
+        using MySqlConnection connection = new MySqlConnection(_connectionString);
+        string result = connection.ExecuteScalar<string>(sql);
+        return result;
     }
     
     [Test]
@@ -213,7 +223,10 @@ public class Exercises1
     
     public QuerySingleResult1 ExercisesQuerySingle()
     {
-        throw new ArgumentException();
+        string sql = """ SELECT FirstName, LastName FROM actors WHERE ActorId = 101 """;
+        using MySqlConnection connection = new MySqlConnection(_connectionString);
+        QuerySingleResult1 result = connection.QuerySingle<QuerySingleResult1>(sql);
+        return result;
     }
     
     [Test]
@@ -244,7 +257,33 @@ public class Exercises1
     
     public QuerySingleResult2 ExercisesQuerySingle2()
     {
-        throw new ArgumentException();
+        //string sql = """ 
+        //            select firstname, lastname, year, duration 
+        //            from directormovie dm 
+        //            join movies m on dm.moviesmovieid = m.movieid 
+        //            join directors d on dm.directorsdirectorid = d.directorid 
+        //            where title = "american beauty" 
+        //            """;
+
+        //string sql = """ 
+        //            select firstname, lastname, year, duration 
+        //            from movies
+        //            inner join directormovie on movies.movieid = directormovie.moviesmovieid 
+        //            inner join directors on directormovie.directorsdirectorid = directors.directorid 
+        //            where title = "american beauty" 
+        //            """;
+
+        string sql = """ 
+                    SELECT d.FirstName, d.LastName, m.Year, m.Duration 
+                    FROM Movies m
+                    INNER JOIN DirectorMovie dm ON m.MovieId = dm.MoviesMovieId 
+                    INNER JOIN Directors d ON dm.DirectorsDirectorId = d.DirectorId 
+                    WHERE Title = 'American Beauty' 
+                    """;
+        
+        using MySqlConnection connection = new MySqlConnection(_connectionString);
+        QuerySingleResult2 result = connection.QuerySingle<QuerySingleResult2>(sql);
+        return result;
     }
     
     [Test]
@@ -274,7 +313,12 @@ public class Exercises1
     
     public QuerySingleResult3 ExerciseQuerySingle3()
     {
-        throw new ArgumentException();
+
+        string sql = """ SELECT Title, ReleaseDate FROM movies WHERE Title = 'Does not exist' """;
+        using MySqlConnection connection = new MySqlConnection(_connectionString);
+        QuerySingleResult3 result = connection.QuerySingle<QuerySingleResult3>(sql);
+        return result;
+        //throw new ArgumentException();
     }
     
     [Test]
@@ -282,9 +326,8 @@ public class Exercises1
     {
         // Arrange
         Exercises1 sut = new Exercises1();
-        
         // Act & Assert
-        Assert.Catch(() => sut.ExerciseQuerySingle3());
+        Assert.Catch<InvalidOperationException>(() => sut.ExerciseQuerySingle3());
     }
     
     // QuerySingleOrDefault<T>() throws an exception if the query returns more than one row.
@@ -300,7 +343,11 @@ public class Exercises1
     }
     public QuerySingleOrDefaultResult1 ExerciseQuerySingleOrDefault1()
     {
-        throw new ArgumentException();
+        string sql = """ SELECT Title, ReleaseDate FROM movies WHERE Title = 'Does not exist' """;
+        using MySqlConnection connection = new MySqlConnection(_connectionString);
+        QuerySingleOrDefaultResult1 result = connection.QuerySingleOrDefault<QuerySingleOrDefaultResult1>(sql);
+        return result;
+        // throw new ArgumentException();
     }
     
     [Test]
