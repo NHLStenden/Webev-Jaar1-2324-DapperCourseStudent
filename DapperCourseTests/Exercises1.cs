@@ -10,11 +10,7 @@ public class Exercises1
     // Create the movies database and tables using the createMovies.sql in the SQL folder.
     // Load the data into the database, by executing the insertMovies.sql script in the SQL folder.
     // This is an exercises to make sure that you can connect to the database.
-    // You can use the NuGet Package Manager or the console to install MySql.Data package. (Database provider for mysql, sometimes called connector or driver)
-    // https://www.learndapper.com/database-providers (go to MySql section)
-    // In the console type: dotnet add package MySql.Data 
-    // If you are using Rider, you can use the NuGet tool window.
-    // If you are using Visual Studio, you can use the NuGet Package Manager.
+   
     // You can find the connection string for mysql here: https://www.connectionstrings.com/mysql/ .
     // Make a database connection to the Movies database. The password that I always use for development is Test@1234!
     // (maybe you need to change this, if you have another password)
@@ -32,15 +28,17 @@ public class Exercises1
     // Rider can help you with this!!! If you type the name of a table or column, it will show you the correct case.
     // Rider can inspect the database schema (structure of database, such as tables, columns, views, etc.)
     // and assist you with writing correct SQL and also the case sensitivity of the table and column names.
-    private static readonly string ConnectionString;
+    private static readonly string _connectionString;
     static Exercises1()
     {
-        ConnectionString = ConnectionStrings.GetConnectionStringMovies();
+        _connectionString = ConnectionStrings.GetConnectionStringMovies();
     }
     
     public bool Exercise0()
     {
-        throw new ArgumentException();
+        using MySqlConnection connection = new MySqlConnection(_connectionString);
+        bool result = connection.QuerySingle<bool>("SELECT 1 = 1");    
+        return result;
     }
     
     [Test]
@@ -71,7 +69,9 @@ public class Exercises1
     // because it returns a strongly typed value!
     public int ExerciseScalar1()
     {
-        throw new ArgumentException();
+        using MySqlConnection connection = new MySqlConnection(_connectionString);
+        int result = connection.ExecuteScalar<int>("SELECT COUNT(*) FROM movies");
+        return result;
     }
     
     [Test]
@@ -92,7 +92,10 @@ public class Exercises1
     // A method that returns a strongly typed value is always better than a method that returns a dynamic type!
     public int ExerciseScalar2()
     {
-        throw new ArgumentException();
+        string sql = "Select COUNT(*) from actors WHERE Gender = 'F'";
+        using MySqlConnection connection = new MySqlConnection(_connectionString);
+        int result = connection.ExecuteScalar<int>(sql);
+        return result;
     }
     
     [Test]
@@ -109,12 +112,15 @@ public class Exercises1
     }
     
     // Of course we can select a different type of scalar value, like a string, boolean, etc.
-    // Are there any reviews with an empty name or no name (null)?
+    // Are there any reviewers with an empty name or no name (null)?
     // Try to use the ExecuteScalar<bool>() method to return a boolean.
     // Write a SQL query to find out.
     public bool ExerciseScalar3()
     {
-        throw new ArgumentException();
+        string sql = "Select COUNT(*) from reviewers WHERE Name IS NULL OR name = ''";
+        using MySqlConnection connection = new MySqlConnection(_connectionString);
+        bool result = connection.ExecuteScalar<bool>(sql);
+        return result;
     }
     
     [Test]

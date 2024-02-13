@@ -1,0 +1,92 @@
+﻿[
+  {
+    CategoryID: 1,
+    CategoryName: Fruit,
+    Products: [
+      {
+        ProductID: 1,
+        ProductName: Apple
+      }
+    ]
+  },
+  {
+    CategoryID: 1,
+    CategoryName: Fruit,
+    Products: [
+      {
+        ProductID: 2,
+        ProductName: Banana
+      }
+    ]
+  },
+  {
+    CategoryID: 1,
+    CategoryName: Fruit,
+    Products: [
+      {
+        ProductID: 3,
+        ProductName: Orange
+      }
+    ]
+  },
+  {
+    CategoryID: 2,
+    CategoryName: Vegetable,
+    Products: [
+      {
+        ProductID: 4,
+        ProductName: Tomato
+      }
+    ]
+  },
+  {
+    CategoryID: 2,
+    CategoryName: Vegetable,
+    Products: [
+      {
+        ProductID: 5,
+        ProductName: Potato
+      }
+    ]
+  },
+  {
+    CategoryID: 2,
+    CategoryName: Vegetable,
+    Products: [
+      {
+        ProductID: 6,
+        ProductName: Carrot
+      }
+    ]
+  },
+  {
+    CategoryID: 3,
+    CategoryName: Meat,
+    Products: [
+      {
+        ProductID: 7,
+        ProductName: Beef
+      }
+    ]
+  },
+  {
+    CategoryID: 3,
+    CategoryName: Meat,
+    Products: [
+      {
+        ProductID: 8,
+        ProductName: Pork
+      }
+    ]
+  },
+  {
+    CategoryID: 3,
+    CategoryName: Meat,
+    Products: [
+      {
+        ProductID: 9,
+        ProductName: Chicken
+      }
+    ]
+  }
+]

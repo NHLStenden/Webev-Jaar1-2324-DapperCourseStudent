@@ -70,7 +70,14 @@ public class JsonToCSharp
     public async Task TestGetCustomersWithRentedMovies()
     {
         List<Customer> customers = GetCustomersWithRentedMovies();
-
+        customers.ForEach(c =>
+        {
+            c.Movies = c.Movies.OrderBy(m => m.FilmId).ToList();
+            c.Movies.ForEach(m =>
+            {
+                m.Actors = m.Actors.OrderBy(a => a.ActorId).ToList();
+            });
+        });
         await Verify(customers);
     }
 

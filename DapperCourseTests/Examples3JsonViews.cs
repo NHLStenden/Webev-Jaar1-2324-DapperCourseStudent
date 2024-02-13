@@ -61,6 +61,14 @@ public class Examples3JsonViews
     public async Task TestCustomerWithRentalsAndActors()
     {
         List<Customer> customers = GetCustomerWithRentalsAndActors();
+        customers.ForEach(c =>
+        {
+            c.Movies = c.Movies.OrderBy(m => m.FilmId).ToList();
+            c.Movies.ForEach(m =>
+            {
+                m.Actors = m.Actors.OrderBy(a => a.ActorId).ToList();
+            });
+        });
 
         await Verify(customers);
     }
