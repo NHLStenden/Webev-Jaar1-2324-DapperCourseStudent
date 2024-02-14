@@ -39,3 +39,56 @@ The `Exercises1.cs` file contains a series of exercises designed to practice usi
 17. **GetMovieById2:** Similar to `GetMovieById`, but returns a nullable `Movie` object. If the movie doesn't exist, it returns null.
 
 Each exercise is accompanied by a unit test to verify the correctness of the implemented method. The exercises cover a range of Dapper's capabilities, from executing simple scalar queries to handling complex queries that return multiple rows and columns.
+
+# Summary of Exercises in `Exercises2.cs`
+
+The `Exercises2.cs` file contains a series of exercises designed to practice using Dapper, a micro ORM (Object-Relational Mapping) library for .NET. The exercises are focused on connecting to a MySQL database, executing various SQL queries, and handling the results using Dapper's methods.
+
+## Exercises
+
+1. **GetCustomerByEmail:** Retrieves a list of customers by their email. The SQL return method used here is `Query<CustomerForSqlInjection>`, which executes a query and maps the result to a list of `CustomerForSqlInjection` objects.
+
+2. **GetCustomerByEmail2:** Similar to `GetCustomerByEmail`, but with SQL injection prevention. The SQL return method used here is `Query<CustomerForSqlInjection>`, which executes a query and maps the result to a list of `CustomerForSqlInjection` objects.
+
+3. **ViewExercises1:** Retrieves a list of rental views. The SQL return method used here is `Query<RentalView>`, which executes a query and maps the result to a list of `RentalView` objects.
+
+4. **ViewExercises2:** Retrieves a list of top rental customers. The SQL return method used here is `Query<TopRentalCustomers>`, which executes a query and maps the result to a list of `TopRentalCustomers` objects.
+
+5. **ViewExercises3:** Retrieves a list of rentals by country. The SQL return method used here is `Query<RentalByCountry>`, which executes a query and maps the result to a list of `RentalByCountry` objects.
+
+6. **ViewExercises4:** Similar to `ViewExercises3`, but with a different implementation. The SQL return method used here is `Query<RentalByCountry>`, which executes a query and maps the result to a list of `RentalByCountry` objects.
+
+7. **ExerciseParameter1:** Retrieves a list of customer searches based on the city. The SQL return method used here is `Query<CustomerSearch>`, which executes a query and maps the result to a list of `CustomerSearch` objects.
+
+8. **ExerciseParameter2:** Similar to `ExerciseParameter1`, but with an optional city parameter. The SQL return method used here is `Query<CustomerSearch>`, which executes a query and maps the result to a list of `CustomerSearch` objects.
+
+9. **ExerciseParameter3:** Retrieves a list of customer searches based on the country and city. The SQL return method used here is `Query<CustomerSearch>`, which executes a query and maps the result to a list of `CustomerSearch` objects.
+
+10. **ExerciseParameter4:** Retrieves a list of customer searches based on a `CustomerSearchParameters` object. The SQL return method used here is `Query<CustomerSearch>`, which executes a query and maps the result to a list of `CustomerSearch` objects.
+
+11. **InsertCustomerCopy:** Inserts a copy of a customer into the database. The SQL return method used here is `Execute`, which executes a command that does not return rows.
+
+12. **InsertCityExercises:** Inserts a city into the database. The SQL return method used here is `Execute`, which executes a command that does not return rows.
+
+Each exercise is accompanied by a unit test to verify the correctness of the implemented method. The exercises cover a range of Dapper's capabilities, from executing simple queries to handling complex queries that return multiple rows and columns.
+
+
+# Summary of Exercises in `Exercises3.cs`
+
+The `Exercises3.cs` file contains a series of exercises designed to practice using Dapper, a micro ORM (Object-Relational Mapping) library for .NET. The exercises are focused on connecting to a MySQL database, executing various SQL queries, and handling the results using Dapper's methods.
+
+## Exercises
+
+1. **ExerciseOneToOne:** This exercise is about creating a query that returns all payments with the customer information. The SQL return method used here would be `Query<Payment, Customer, Payment>`, which executes a query and maps the result to a list of `Payment` objects, each containing a `Customer` object.
+
+2. **ExerciseOneToOneTwoJoins:** Similar to `ExerciseOneToOne`, but now with an additional join to the address table. The SQL return method used here would be `Query<Payment, Customer, Address, Payment>`, which executes a query and maps the result to a list of `Payment` objects, each containing a `Customer` object, which in turn contains an `Address` object.
+
+3. **ExerciseOneToManyWithDictionaryMethod:** This exercise is about creating a query that returns all stores with their customers. The SQL return method used here would be `Query<Store, Customer, Store>`, which executes a query and maps the result to a list of `Store` objects, each containing a list of `Customer` objects.
+
+4. **ExerciseOneToManyWithJsonMethod:** Similar to `ExerciseOneToManyWithDictionaryMethod`, but now using the JSON method. The SQL return method used here would be `Query<Store, Customer, Store>`, which executes a query and maps the result to a list of `Store` objects, each containing a list of `Customer` objects.
+
+5. **GetFilmsIncludeActorsDictionaryMethod:** This exercise is about creating a query that returns a list of films with their actors. The SQL return method used here would be `Query<Film, Actor, Film>`, which executes a query and maps the result to a list of `Film` objects, each containing a list of `Actor` objects.
+
+6. **GetFilmsIncludeActorsJsonMethod:** Similar to `GetFilmsIncludeActorsDictionaryMethod`, but now using the JSON method. The SQL return method used here would be `Query<Film, Actor, Film>`, which executes a query and maps the result to a list of `Film` objects, each containing a list of `Actor` objects.
+
+Each exercise is accompanied by a unit test to verify the correctness of the implemented method. The exercises cover a range of Dapper's capabilities, from executing simple queries to handling complex queries that return multiple rows and columns.
