@@ -1,9 +1,7 @@
 ﻿# Exercises1.cs Summary
 
-Test [ExampleScalar1](../Examples1.cs::ExampleScalar1) and [ExampleQuery1](../ExampleQuery1) with Dapper.
 
-The `Exercises1.cs` file is a C# test suite that uses Dapper, a micro ORM for .NET, to interact with a MySQL database. Here's a brief summary of the methods used:
-
+The [`Exercises1.cs`](exercises1.cs) file is a C# test suite that uses Dapper, a micro ORM for .NET, to interact with a MySQL database. Here's a brief summary of the methods used:
 
 
 - `Exercise0()`: Tests the database connection by executing a simple SQL query.
