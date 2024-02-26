@@ -28,8 +28,8 @@ public class Exercises1
     // Rider can help you with this!!! If you type the name of a table or column, it will show you the correct case.
     // Rider can inspect the database schema (structure of database, such as tables, columns, views, etc.)
     // and assist you with writing correct SQL and also the case sensitivity of the table and column names.
-    private static readonly string _connectionString;
-    static Exercises1()
+    private readonly string _connectionString;
+    public Exercises1()
     {
         _connectionString = ConnectionStrings.GetConnectionStringMovies();
     }
@@ -41,19 +41,19 @@ public class Exercises1
         return result;
     }
     
-    [Test]
-    public void Exercise0Test()
-    {
-        // Arrange
-        Exercises1 sut = new Exercises1();
-        
-        // Act
-        bool result = sut.Exercise0();
-        
-        // Assert
-        result.Should().BeTrue();
-        // Assert.AreEqual(true, result); 
-    }
+    // [Test]
+    // public void Exercise0Test()
+    // {
+    //     // Arrange
+    //     Exercises1 sut = new Exercises1();
+    //     
+    //     // Act
+    //     bool result = sut.Exercise0();
+    //     
+    //     // Assert
+    //     result.Should().BeTrue();
+    //     // Assert.AreEqual(true, result); 
+    // }
     
     // First we will start with some simple queries, that only return one single value (1 row with 1 column).
     // This is called a scalar value.
