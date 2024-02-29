@@ -4,7 +4,6 @@ using MySqlConnector;
 
 namespace DapperCourseTests;
 
-
 public class Exercises1
 {
     // Create the movies database and tables using the createMovies.sql in the SQL folder.
@@ -28,12 +27,16 @@ public class Exercises1
     // Rider can help you with this!!! If you type the name of a table or column, it will show you the correct case.
     // Rider can inspect the database schema (structure of database, such as tables, columns, views, etc.)
     // and assist you with writing correct SQL and also the case sensitivity of the table and column names.
-    private readonly string _connectionString;
-    public Exercises1()
+    private readonly string? _connectionString;
+    public Exercises1() 
     {
         _connectionString = ConnectionStrings.GetConnectionStringMovies();
     }
-    
+
+    public Exercises1(int databaseNumber)
+    {
+    }
+
     public bool Exercise0()
     {
         using MySqlConnection connection = new MySqlConnection(_connectionString);
@@ -273,13 +276,13 @@ public class Exercises1
         //            where title = "american beauty" 
         //            """;
 
-        string sql = """ 
-                    SELECT d.FirstName, d.LastName, m.Year, m.Duration 
-                    FROM Movies m
-                    INNER JOIN DirectorMovie dm ON m.MovieId = dm.MoviesMovieId 
-                    INNER JOIN Directors d ON dm.DirectorsDirectorId = d.DirectorId 
-                    WHERE Title = 'American Beauty' 
-                    """;
+        string sql = """
+                     SELECT d.FirstName, d.LastName, m.Year, m.Duration
+                     FROM Movies m
+                     INNER JOIN DirectorMovie dm ON m.MovieId = dm.MoviesMovieId
+                     INNER JOIN Directors d ON dm.DirectorsDirectorId = d.DirectorId
+                     WHERE Title = 'American Beauty'
+                     """;
         
         using MySqlConnection connection = new MySqlConnection(_connectionString);
         QuerySingleResult2 result = connection.QuerySingle<QuerySingleResult2>(sql);
@@ -378,7 +381,10 @@ public class Exercises1
     
     public ExerciseQueryFirst1 ExerciseQueryFirst()
     {
-        throw new ArgumentException();
+        string sql = """ SELECT Title, Language FROM movies WHERE Language = 'English' ORDER BY Title """;
+        using MySqlConnection connection = new MySqlConnection(_connectionString);
+        ExerciseQueryFirst1 result = connection.QueryFirst<ExerciseQueryFirst1>(sql);
+        return result;
     }
     
     [Test]
@@ -395,12 +401,15 @@ public class Exercises1
         result.Language.Should().Be("English");
     }
     
-    // Write a SQL query to find the name and year of the movies.
+    // Write a SQL query that returns the Title and Year of the first 10 movies ordered by Title.
     // Use the correct Dapper method and return a IEnumerable<dynamic> object.
     // Don't worry about the return type, we will fix that in the next exercise.
     public IEnumerable<dynamic> ExerciseQueryDynamic()
     {
-        throw new ArgumentException();
+        string sql = " SELECT Title, Year FROM movies ORDER BY Title LIMIT 10 ";
+        using MySqlConnection connection = new MySqlConnection(_connectionString);
+        IEnumerable<dynamic> result = connection.Query(sql);
+        return result;
     }
     
     [Test]
@@ -419,18 +428,21 @@ public class Exercises1
     }
     
     // It's not a good practice to use an IEnumerable<dynamic> as in the previous exercise. Let's fix that.
-    // Write a SQL query to find the name and year of the movies. This time return a list of Movie objects.
+    // Write a SQL query to return the name and year of the first 10 movies Ordered by Title. This time return a list of Movie objects.
     // Use the correct Dapper method (Query<T>(sql)) and create a class named ResultExerciseQuery with the properties Title and Year.
     // Use the correct types for the properties.
     public class ResultExerciseQuery
     {
-        public string Title { get; set; } = null!;
+        public string Title { get; set; } = null!; //remove this as well in the student version
         public int Year { get; set; }
     }
     
     public IEnumerable<ResultExerciseQuery> ExerciseQuery()
-    {
-        throw new ArgumentException();
+    { 
+        string sql = " SELECT Title, Year FROM movies ORDER BY Title LIMIT 10 ";
+        using MySqlConnection connection = new MySqlConnection(_connectionString);
+        IEnumerable<ResultExerciseQuery> result = connection.Query<ResultExerciseQuery>(sql);
+        return result;
     }
     
     [Test]
@@ -452,7 +464,16 @@ public class Exercises1
     // Order the result alphabetically. It's always a good idea to return a List<T> instead of IEnumerable<T> when using Dapper.
     public List<string> ExerciseQuery2()
     {
-        throw new ArgumentException();
+        string sql = @"
+                    SELECT m.Title 
+                    FROM movies m 
+                    JOIN directormovie dm ON m.MovieId = dm.MoviesMovieId 
+                    JOIN directors d ON dm.DirectorsDirectorId = d.DirectorId 
+                    WHERE d.FirstName = 'Kevin' AND d.LastName = 'Spacey' 
+                    ORDER BY m.Title ";
+        using MySqlConnection connection = new MySqlConnection(_connectionString);
+        List<string> result = connection.Query<string>(sql).ToList();
+        return result;
     }
     
     [Test]

@@ -28,9 +28,9 @@ The `Exercises1.cs` file contains a series of exercises designed to practice usi
 
 12. **ExerciseQueryFirst:** Returns the first movie with the language 'English'. Returns the movie details as a string.
 
-13. **ExerciseQueryDynamic:** Returns the name and year of the movies. Returns the details as a dynamic object.
+13. **ExerciseQueryDynamic:** Returns the title and year of the first 10 movies ordered by title as a list of dynamic objects.
 
-14. **ExerciseQuery:** Returns the name and year of the movies as a list of `ResultExerciseQuery` objects.
+14. **ExerciseQuery:** Returns the title and year of the first 10 movies ordered by title as a list of `ResultExerciseQuery` objects.
 
 15. **ExerciseQuery2:** Finds all the titles of the movies directed by 'Kevin Spacey'. Returns the movie titles as a list of strings.
 
