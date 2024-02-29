@@ -11,4 +11,5 @@
 /DapperCourseTests/obj/DapperCourseTests.csproj.nuget.g.props
 /DapperCourseTests/obj/DapperCourseTests.csproj.nuget.g.targets
 /DapperCourseTests/obj/project.assets.json
-/DapperCourseTests/obj/project.nuget.cache
+/DapperCourseTests/obj/
+/.idea

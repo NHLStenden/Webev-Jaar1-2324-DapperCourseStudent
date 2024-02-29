@@ -1,0 +1,88 @@
+﻿[
+  {
+    StoreId: 1,
+    ManagerStaffId: 1,
+    Customers: [
+      {
+        CustomerId: 1,
+        StoreId: 1,
+        FirstName: MARY,
+        LastName: SMITH,
+        Email: MARY.SMITH@sakilacustomer.org,
+        AddressId: 5
+      },
+      {
+        CustomerId: 2,
+        StoreId: 1,
+        FirstName: PATRICIA,
+        LastName: JOHNSON,
+        Email: PATRICIA.JOHNSON@sakilacustomer.org,
+        AddressId: 6
+      },
+      {
+        CustomerId: 3,
+        StoreId: 1,
+        FirstName: LINDA,
+        LastName: WILLIAMS,
+        Email: LINDA.WILLIAMS@sakilacustomer.org,
+        AddressId: 7
+      },
+      {
+        CustomerId: 5,
+        StoreId: 1,
+        FirstName: ELIZABETH,
+        LastName: BROWN,
+        Email: ELIZABETH.BROWN@sakilacustomer.org,
+        AddressId: 9
+      },
+      {
+        CustomerId: 7,
+        StoreId: 1,
+        FirstName: MARIA,
+        LastName: MILLER,
+        Email: MARIA.MILLER@sakilacustomer.org,
+        AddressId: 11
+      },
+      {
+        CustomerId: 10,
+        StoreId: 1,
+        FirstName: DOROTHY,
+        LastName: TAYLOR,
+        Email: DOROTHY.TAYLOR@sakilacustomer.org,
+        AddressId: 14
+      },
+      {
+        CustomerId: 12,
+        StoreId: 1,
+        FirstName: NANCY,
+        LastName: THOMAS,
+        Email: NANCY.THOMAS@sakilacustomer.org,
+        AddressId: 16
+      },
+      {
+        CustomerId: 15,
+        StoreId: 1,
+        FirstName: HELEN,
+        LastName: HARRIS,
+        Email: HELEN.HARRIS@sakilacustomer.org,
+        AddressId: 19
+      },
+      {
+        CustomerId: 17,
+        StoreId: 1,
+        FirstName: DONNA,
+        LastName: THOMPSON,
+        Email: DONNA.THOMPSON@sakilacustomer.org,
+        AddressId: 21
+      },
+      {
+        CustomerId: 19,
+        StoreId: 1,
+        FirstName: RUTH,
+        LastName: MARTINEZ,
+        Email: RUTH.MARTINEZ@sakilacustomer.org,
+        AddressId: 23
+      }
+    ]
+  }
+]

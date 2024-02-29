@@ -1,0 +1,62 @@
+﻿[
+  {
+    CustomerId: 60,
+    FirstName: MILDRED,
+    LastName: BAILEY,
+    Email: MILDRED.BAILEY@sakilacustomer.org
+  },
+  {
+    CustomerId: 37,
+    FirstName: PAMELA,
+    LastName: BAKER,
+    Email: PAMELA.BAKER@sakilacustomer.org
+  },
+  {
+    CustomerId: 383,
+    FirstName: MARTIN,
+    LastName: BALES,
+    Email: MARTIN.BALES@sakilacustomer.org
+  },
+  {
+    CustomerId: 559,
+    FirstName: EVERETT,
+    LastName: BANDA,
+    Email: EVERETT.BANDA@sakilacustomer.org
+  },
+  {
+    CustomerId: 215,
+    FirstName: JESSIE,
+    LastName: BANKS,
+    Email: JESSIE.BANKS@sakilacustomer.org
+  },
+  {
+    CustomerId: 551,
+    FirstName: CLAYTON,
+    LastName: BARBEE,
+    Email: CLAYTON.BARBEE@sakilacustomer.org
+  },
+  {
+    CustomerId: 503,
+    FirstName: ANGEL,
+    LastName: BARCLAY,
+    Email: ANGEL.BARCLAY@sakilacustomer.org
+  },
+  {
+    CustomerId: 362,
+    FirstName: NICHOLAS,
+    LastName: BARFIELD,
+    Email: NICHOLAS.BARFIELD@sakilacustomer.org
+  },
+  {
+    CustomerId: 382,
+    FirstName: VICTOR,
+    LastName: BARKLEY,
+    Email: VICTOR.BARKLEY@sakilacustomer.org
+  },
+  {
+    CustomerId: 79,
+    FirstName: RACHEL,
+    LastName: BARNES,
+    Email: RACHEL.BARNES@sakilacustomer.org
+  }
+]

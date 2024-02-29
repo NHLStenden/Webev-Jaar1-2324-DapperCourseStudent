@@ -27,14 +27,10 @@ public class Exercises1
     // Rider can help you with this!!! If you type the name of a table or column, it will show you the correct case.
     // Rider can inspect the database schema (structure of database, such as tables, columns, views, etc.)
     // and assist you with writing correct SQL and also the case sensitivity of the table and column names.
-    private readonly string? _connectionString;
+    private readonly string _connectionString;
     public Exercises1() 
     {
         _connectionString = ConnectionStrings.GetConnectionStringMovies();
-    }
-
-    public Exercises1(int databaseNumber)
-    {
     }
 
     public bool Exercise0()
@@ -508,7 +504,11 @@ public class Exercises1
 
     public Movie GetMovieById(int movieId)
     {
-        throw new ArgumentException();
+        string sql = "SELECT * FROM movies WHERE MovieId = @MovieId";
+        using MySqlConnection connection = new MySqlConnection(_connectionString);
+        Movie result = connection.QuerySingle<Movie>(sql, new {MovieId = movieId});
+        return result;
+        
     }
     
     [Test]
@@ -536,7 +536,10 @@ public class Exercises1
     // If the movie doesn't exist, return null.
     public Movie? GetMovieById2(int movieId )
     {
-        throw new ArgumentException();
+        string sql = "SELECT * FROM movies WHERE MovieId = @MovieId";
+        using MySqlConnection connection = new MySqlConnection(_connectionString);
+        Movie? result = connection.QuerySingleOrDefault<Movie>(sql, new {MovieId = movieId});
+        return result;
     }
     
     [Test]

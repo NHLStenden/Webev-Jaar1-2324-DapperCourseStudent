@@ -15,22 +15,22 @@ public class Exercises2
     // actor, address, category, city, country, customer, film, film_actor, film_category, inventory, language, payment, rental, staff, store
     // the structure (database diagram) can be found here:
     // https://dev.mysql.com/doc/sakila/en/sakila-structure.html (the direction of the arrows is incorrect!)
-    private static readonly string ConnectionString;
-    static Exercises2()
+    private  readonly string _connectionString;
+    public Exercises2()
     {
-        ConnectionString = ConnectionStrings.GetConnectionStringSakila();
+        _connectionString = ConnectionStrings.GetConnectionStringSakila();
     }
     
     [Test]
     public void TestDatabaseIsCreatedAndFilled()
     {
-        using MySqlConnection connection = new MySqlConnection(ConnectionString);
+        using MySqlConnection connection = new MySqlConnection(_connectionString);
         string sql = """SELECT COUNT(*) FROM nicer_but_slower_film_list""";
         int count = connection.ExecuteScalar<int>(sql);
         count.Should().Be(1000);
     }
     
-    // NEVER EVER DO THIS AGAIN, THIS IS AN SQL INJECTION EXAMPLE!
+    // NEVER EVER DO THE EXERCISE BELOW AGAIN, THIS IS AN SQL INJECTION EXAMPLE!
     // Write a query that returns one customer by its email.
     // Use string interpolation ($" ... WHERE email = '{email}'") or concatenation to create the query string
     // and pass it to the Query method.
@@ -48,14 +48,17 @@ public class Exercises2
     
     public List<CustomerForSqlInjection> GetCustomerByEmail(string email)
     {
-        throw new NotImplementedException();
+        using MySqlConnection connection = new MySqlConnection(_connectionString);
+        string sql = $"SELECT customer_id, first_name, last_name, email FROM customer WHERE email = '{email}'";
+        List<CustomerForSqlInjection> customers = connection.Query<CustomerForSqlInjection>(sql).ToList();
+        return customers;
     }
     
     [Test]
     public void SqlInjectionTest()
     {
         string email = "PATRICIA.JOHNSON@sakilacustomer.org";
-        using MySqlConnection connection = new MySqlConnection(ConnectionString);
+        using MySqlConnection connection = new MySqlConnection(_connectionString);
         
         GetCustomerByEmail(email).Should().HaveCount(1);
 
@@ -63,18 +66,21 @@ public class Exercises2
         allCustomers.Should().HaveCount(599); //this demonstrates SQL injection, we get all the customers instead of the one we want
     }
     
-    //Fix the previous exercise, use SQL Parameter Placeholders (WHERE email = @Email).
+    //Fix the previous exercise, use SQL Parameter Placeholders (WHERE email = @email) and pass the parameter to the Query method.
     //Always use SQL Parameter Placeholders!!!!!
     public List<CustomerForSqlInjection> GetCustomerByEmail2(string email)
     {
-        throw new NotImplementedException();
+        using MySqlConnection connection = new MySqlConnection(_connectionString);
+        string sql = "SELECT customer_id, first_name, last_name, email FROM customer WHERE email = @email";
+        List<CustomerForSqlInjection> customers = connection.Query<CustomerForSqlInjection>(sql, new { email }).ToList();
+        return customers;
     }
     
     [Test]
     public void SqlInjectionPreventionTest()
     {
         string email = "PATRICIA.JOHNSON@sakilacustomer.org";
-        using MySqlConnection connection = new MySqlConnection(ConnectionString);
+        using MySqlConnection connection = new MySqlConnection(_connectionString);
         
         GetCustomerByEmail(email).Should().HaveCount(1);
 
@@ -120,7 +126,27 @@ public class Exercises2
     
     public List<RentalView> ViewExercises1()
     {
-        throw new NotImplementedException();
+        using MySqlConnection connection = new MySqlConnection(_connectionString);
+        string sql = """
+                     DROP VIEW IF EXISTS rental_view;
+                     CREATE VIEW rental_view AS
+                     SELECT r.rental_id as RentalId, r.rental_date as RentalDate, r.inventory_id as InventoryId, r.customer_id as CustomerId,
+                       r.return_date as ReturnDate, r.staff_id as StaffId, r.last_update as RentalLastUpdate,
+                       c.first_name as FirstName, c.last_name as LastName, c.email as Email, c.address_id as AddressId, c.active as Active, c.create_date as CreateDate,
+                       i.film_id as FilmId, i.store_id as StoreId, i.last_update as InventoryLastUpdate,
+                       f.title as Title, f.description as Description, f.release_year as ReleaseYear, f.language_id as LanguageId, f.original_language_id as OriginalLanguageId,
+                       f.rental_duration as RentalDuration, f.rental_rate as RentalRate, f.length as Length, f.replacement_cost as ReplacementCost, f.rating as Rating,
+                       f.special_features as SpecialFeatures, f.last_update as FilmLastUpdate
+                     FROM rental r
+                        JOIN customer c ON r.customer_id = c.customer_id
+                        JOIN inventory i ON r.inventory_id = i.inventory_id
+                        JOIN film f ON i.film_id = f.film_id
+                     """;
+        connection.Execute(sql);
+        
+        List<RentalView> result = connection.Query<RentalView>("SELECT * FROM rental_view").ToList();
+        return result;
+
     }
     
     [Test]
@@ -136,13 +162,13 @@ public class Exercises2
         result.Should().HaveCount(16044);
     }
 
-    //In the previous exercise we created a view, this one has a lot (maybe too much) columns.
+    //In the previous exercise we created a view, this one has a lot of columns (maybe too many) .
     //We can query the view with only the columns that we need and we can rename the columns with the AS keyword (or space).
     //Create a query based on the view from the previous exercise, but only select the following columns:
     //CustomerId, Lastname, Firstname, AmountOfRentals
     //Order Descending (DESC) by AmountOfRentals
     //Select only the first 10 rows
-    //This query select the top 10 customers with the most rentals
+    //This query selects the top 10 customers with the most rentals
 
     public class TopRentalCustomers
     {
@@ -154,7 +180,16 @@ public class Exercises2
     
     public List<TopRentalCustomers> ViewExercises2()
     {
-        throw new NotImplementedException();
+        using MySqlConnection connection = new MySqlConnection(_connectionString);
+        string sql = """
+                     SELECT CustomerId, LastName, FirstName, COUNT(*) AS AmountOfRentals
+                     FROM rental_view
+                     GROUP BY CustomerId
+                     ORDER BY AmountOfRentals DESC
+                     LIMIT 10
+                     """;
+        List<TopRentalCustomers> result = connection.Query<TopRentalCustomers>(sql).ToList();
+        return result;
     }
     
     [Test]
@@ -192,7 +227,19 @@ public class Exercises2
 
     public List<RentalByCountry> ViewExercises3()
     {
-        throw new NotImplementedException();
+        using MySqlConnection connection = new MySqlConnection(_connectionString);
+        string sql = """
+                     SELECT co.country as CountryName, COUNT(*) AS AmountOfRentalsByCountry
+                     FROM rental_view rv
+                        JOIN address a ON rv.AddressId = a.address_id
+                        JOIN city ci ON a.city_id = ci.city_id
+                        JOIN country co ON ci.country_id = co.country_id
+                     GROUP BY co.country
+                     ORDER BY AmountOfRentalsByCountry DESC
+                     LIMIT 10
+                     """;
+        List<RentalByCountry> result = connection.Query<RentalByCountry>(sql).ToList();
+        return result;
     }
     
     [Test]
@@ -226,11 +273,33 @@ public class Exercises2
     //In this case we hide the complexity of the database schema.
     //In my opinion, views are not used enough, they are a very powerful tool to abstract complexity!
     //Also I find abstraction a very important concept in software development, it's a way to hide complexity.
-    //Abstraction are everywhere in software development, OO programming is a way to abstract complexity (methods, classes, interfaces, ...),
+    //Abstraction are everywhere in software development, Object orientated programming is a way to abstract complexity (methods, classes, interfaces, ...),
     //Enough about abstraction, let's create the customer_view and use it to reproduce the query from the previous exercise.
     public List<RentalByCountry> ViewExercises4()
     {
-        throw new NotImplementedException();
+        using MySqlConnection connection = new MySqlConnection(_connectionString);
+        string sql1 = """
+                     DROP VIEW IF EXISTS customer_view;
+                     CREATE VIEW customer_view AS
+                     SELECT c.customer_id, c.first_name, c.last_name, c.email, c.address_id, a.address , a.address2 , a.district, a.city_id, a.postal_code as PostalCode,
+                       a.phone as Phone, ci.city as City, ci.country_id, co.country
+                       FROM customer c
+                        JOIN address a ON c.address_id = a.address_id
+                        JOIN city ci ON a.city_id = ci.city_id
+                        JOIN country co ON ci.country_id = co.country_id;
+                     """;
+        connection.Execute(sql1);
+
+        string sql2 = """
+                      SELECT cv.country as CountryName, COUNT(*) AS AmountOfRentalsByCountry
+                      FROM rental_view rv
+                         JOIN customer_view cv ON rv.CustomerId = cv.customer_id
+                      GROUP BY cv.country
+                      ORDER BY AmountOfRentalsByCountry DESC
+                      LIMIT 10
+                      """;
+        List<RentalByCountry> result = connection.Query<RentalByCountry>(sql2).ToList();
+        return result;
     }
     
     [Test]
@@ -253,7 +322,7 @@ public class Exercises2
     }    
     
     //Let's shift our attention to parameters.
-    //For our rental business we want to create a queries that return information about customers.
+    //For our rental business we want to create a query that returns information about customers.
     //In other words, we want to create a query that returns a list of customers based on different criteria.
     //Create a query that returns all the customers that live in a certain city (city is a parameter).
     //Use parameter placeholders (@city) and pass the parameter to the Query method.
@@ -261,7 +330,7 @@ public class Exercises2
     //Use the Customer class (CustomerSearch) below to map the result, it has the following properties:
     //CustomerId, FirstName, LastName, Email
     //Order by LastName, FirstName
-    //Limit the result to 10 rows
+//Limit the result to 10 rows
 
     public class CustomerSearch
     {
@@ -273,7 +342,17 @@ public class Exercises2
     
     public List<CustomerSearch> ExerciseParameter1(string city)
     {
-        throw new NotImplementedException();
+        using MySqlConnection connection = new MySqlConnection(_connectionString);
+        string sql ="""
+                    SELECT c.customer_id AS CustomerId, c.last_name AS LastName, c.first_name AS FirstName, c.email AS Email
+                    FROM customer c
+                        JOIN address a on c.address_id = a.address_id
+                            JOIN city ci on a.city_id = ci.city_id WHERE ci.city = @city
+                    ORDER BY c.last_name, c.first_name
+                    LIMIT 10
+                    """;
+        List<CustomerSearch> result = connection.Query<CustomerSearch>(sql, new { city }).ToList();
+        return result;
     }
 
     [Test]
@@ -304,7 +383,18 @@ public class Exercises2
     //So the query is the same as the previous exercise, but the parameter is optional
     public List<CustomerSearch> ExerciseParameter2(string? city = null)
     {
-        throw new NotImplementedException();
+        using MySqlConnection connection = new MySqlConnection(_connectionString);
+        string sql ="""
+                    SELECT c.customer_id AS CustomerId, c.last_name AS LastName, c.first_name AS FirstName, c.email AS Email
+                    FROM customer c
+                        JOIN address a on c.address_id = a.address_id
+                            JOIN city ci on a.city_id = ci.city_id
+                    WHERE ci.city = @city OR @city IS NULL
+                    ORDER BY c.last_name, c.first_name
+                    LIMIT 10
+                    """;
+        List<CustomerSearch> result = connection.Query<CustomerSearch>(sql, new { city }).ToList();
+        return result;
     }
     
     [Test]
@@ -340,7 +430,19 @@ public class Exercises2
     
     public List<CustomerSearch> ExerciseParameter3(string? country = null, string? city = null)
     {
-        throw new NotImplementedException();
+        using MySqlConnection connection = new MySqlConnection(_connectionString);
+        string sql ="""
+                    SELECT c.customer_id AS CustomerId, c.last_name AS LastName, c.first_name AS FirstName, c.email AS Email
+                    FROM customer c
+                        JOIN address a on c.address_id = a.address_id
+                            JOIN city ci on a.city_id = ci.city_id
+                            JOIN country co on ci.country_id = co.country_id
+                    WHERE (ci.city = @city OR @city IS NULL) AND (co.country = @country OR @country IS NULL)
+                    ORDER BY c.last_name, c.first_name
+                    LIMIT 10
+                    """;
+        List<CustomerSearch> result = connection.Query<CustomerSearch>(sql, new { country, city }).ToList();
+        return result;
     }
 
     [Test]
@@ -406,7 +508,19 @@ public class Exercises2
     
     public List<CustomerSearch> ExerciseParameter4(CustomerSearchParameters customerSearchParameters)
     {
-        throw new NotImplementedException();
+        using MySqlConnection connection = new MySqlConnection(_connectionString);
+        string sql ="""
+                    SELECT c.customer_id AS CustomerId, c.last_name AS LastName, c.first_name AS FirstName, c.email AS Email
+                    FROM customer c
+                        JOIN address a on c.address_id = a.address_id
+                            JOIN city ci on a.city_id = ci.city_id
+                            JOIN country co on ci.country_id = co.country_id
+                    WHERE (ci.city = @City OR @City IS NULL) AND (co.country = @Country OR @Country IS NULL)
+                    ORDER BY c.last_name, c.first_name
+                    LIMIT @PageSize OFFSET @Offset
+                    """;
+        List<CustomerSearch> result = connection.Query<CustomerSearch>(sql, customerSearchParameters).ToList();
+        return result;
     }
 
     [Test]
@@ -488,7 +602,27 @@ public class Exercises2
     
     public int InsertCustomerCopy(InsertCustomerParameters insertCustomerParameters)
     {
-        throw new NotImplementedException();
+        string sql =
+            """
+                DROP TABLE IF EXISTS customer_copy;
+                CREATE TABLE customer_copy as SELECT * FROM customer LIMIT 0;
+                alter table customer_copy
+                    add constraint customer_copy_pk
+                        primary key (customer_id);
+                alter table customer_copy MODIFY COLUMN customer_id INT AUTO_INCREMENT;
+            """;
+        
+        using MySqlConnection connection = new MySqlConnection(_connectionString);
+        connection.Execute(sql);
+
+        string insertSql =
+            """
+                INSERT INTO customer_copy (store_id, first_name, last_name, email, address_id, active, create_date, last_update)
+                VALUES (@StoreId, @FirstName, @LastName, @Email, @AddressId, @Active, @CreateDate, @LastUpdate);
+                SELECT LAST_INSERT_ID();
+            """;
+        int lastInsertedId = connection.ExecuteScalar<int>(insertSql, insertCustomerParameters);
+        return lastInsertedId;
     }
 
     [Test]
@@ -515,7 +649,7 @@ public class Exercises2
         // Assert
         result.Should().Be(1);
         
-        using MySqlConnection connection = new MySqlConnection(ConnectionString);
+        using MySqlConnection connection = new MySqlConnection(_connectionString);
         string sql = """
                      SELECT customer_id as CustomerId, store_id as StoreId, first_name as FirstName, last_name as LastName,
                        email as Email, address_id as AddressId, active as Active, create_date as CreateDate, last_update as LastUpdate
@@ -553,7 +687,43 @@ public class Exercises2
 
     public int InsertCityExercises(InsertCountry country, InsertCity insertCity)
     {
-        throw new NotImplementedException();
+        string sqlCreateCopyTables = """
+                                     DROP TABLE IF EXISTS city_copy;
+                                        DROP TABLE IF EXISTS country_copy;
+                                        CREATE TABLE country_copy as SELECT * FROM country LIMIT 0;
+                                        alter table country_copy
+                                            add constraint country_copy_pk
+                                                primary key (country_id);
+                                        alter table country_copy MODIFY COLUMN country_id INT AUTO_INCREMENT;
+                                        CREATE TABLE city_copy as SELECT * FROM city LIMIT 0;
+                                        alter table city_copy
+                                            add constraint city_copy_pk
+                                                primary key (city_id);
+                                        alter table city_copy MODIFY COLUMN city_id INT AUTO_INCREMENT;
+                                     """;
+        using MySqlConnection connection = new MySqlConnection(_connectionString);
+        connection.Execute(sqlCreateCopyTables);
+        
+        
+        string countryExistsSql = "SELECT country_id FROM country_copy WHERE country = @Country";
+        
+        int? countryId = connection.QuerySingleOrDefault<int?>(countryExistsSql, country);
+        if (!countryId.HasValue)
+        {
+            string sqlInsertCountry = """
+                                      INSERT INTO country_copy (country, last_update) VALUES (@Country, @LastUpdate);
+                                        SELECT LAST_INSERT_ID();
+                                      """;
+            
+            countryId = connection.ExecuteScalar<int>(sqlInsertCountry, country);
+        }
+        
+        string sqlInsertCity = """
+                                INSERT INTO city_copy (city, country_id, last_update) VALUES (@City, @CountryId, @LastUpdate);
+                                SELECT LAST_INSERT_ID();
+                               """;
+        int cityId = connection.ExecuteScalar<int>(sqlInsertCity, new {City = insertCity.City, CountryId = countryId, insertCity.LastUpdate});
+        return cityId;
     }
 
     [Test]
@@ -581,7 +751,7 @@ public class Exercises2
         // Assert
         result.Should().Be(1);
         
-        using MySqlConnection connection = new MySqlConnection(ConnectionString);
+        using MySqlConnection connection = new MySqlConnection(_connectionString);
         string sql = """
                      SELECT city_id as CityId, city as City, country_id as CountryId, last_update as LastUpdate
                          FROM city_copy

@@ -7,6 +7,12 @@ namespace DapperCourseTests;
 
 public class Exercises3
 {
+    private readonly string _connectionString;
+
+    public Exercises3()
+    {
+        _connectionString = ConnectionStrings.GetConnectionStringSakila();
+    }
     //In this exercise we will use the sakila database to practice with relationships.
     //Each payment has one customer
     //Create a query that returns all payments with the customer information
@@ -16,7 +22,7 @@ public class Exercises3
     //There are no 1 to 1 relationships in the sakila database, so we will use the 1 to many relationship as 1 to 1 example.
     //Actually 1 to 1 relationships are not very common in databases, because you can just add the columns to the same table.
 
-    //Tip: if you are joining two tables or more tables with 1 to 1 relationships, you can use the one query and split the result.
+    //Tip: if you are joining two or more tables with 1 to 1 relationships, you can use the one query and split the result.
     //Use the Query<TFirst, TSecond, TReturn>(...) method for this. 
     public class Payment
     {
@@ -45,15 +51,35 @@ public class Exercises3
         public Address Address { get; set; } = null!;
     }
 
-    public class Address
-    {
-        public int AddressId { get; set; }
-        public string Address1 { get; set; } = null!;
-    }
+  
 
     public List<Payment> ExerciseOneToOne()
     {
-        throw new NotImplementedException();
+        string sql = $@"
+            SELECT payment_id AS {nameof(Payment.PaymentId)}, 
+                    p.customer_id AS {nameof(Payment.CustomerId)},
+                    staff_id AS {nameof(Payment.StaffId)},
+                    rental_id AS {nameof(Payment.RentalId)},
+                    amount AS {nameof(Payment.Amount)},
+                    payment_date AS {nameof(Payment.PaymentDate)},
+                    p.last_update AS {nameof(Payment.LastUpdate)},
+                    'SplitCustomer' as 'SplitCustomer',
+                    c.customer_id AS {nameof(Customer.CustomerId)},
+                    store_id AS {nameof(Customer.StoreId)},
+                    first_name AS {nameof(Customer.FirstName)},
+                    last_name AS {nameof(Customer.LastName)},
+                    email AS {nameof(Customer.Email)}
+            FROM payment p
+                JOIN customer c ON p.customer_id = c.customer_id
+            ORDER BY payment_id
+                ";
+        using MySqlConnection connection = new MySqlConnection(_connectionString);
+        List<Payment> result = connection.Query<Payment, Customer, Payment>(sql, (payment, customer) =>
+            {
+                payment.Customer = customer;
+                return payment;
+            }, splitOn: "SplitCustomer").ToList();
+        return result;
     }
 
     [Test]
@@ -88,9 +114,46 @@ public class Exercises3
 
     // Same as ExerciseOneToOne, but now use add another join the address table with customer.
     // The address table has a one to one relationship with the customer table.
+    
+    public class Address
+    {
+        public int AddressId { get; set; }
+        public string Address1 { get; set; } = null!;
+    }
+    
     public List<Payment> ExerciseOneToOneTwoJoins()
     {
-        throw new NotImplementedException();
+        string sql = $@"
+            SELECT payment_id AS {nameof(Payment.PaymentId)}, 
+                    p.customer_id AS {nameof(Payment.CustomerId)},
+                    staff_id AS {nameof(Payment.StaffId)},
+                    rental_id AS {nameof(Payment.RentalId)},
+                    amount AS {nameof(Payment.Amount)},
+                    payment_date AS {nameof(Payment.PaymentDate)},
+                    p.last_update AS {nameof(Payment.LastUpdate)},
+                    'SplitCustomer' as 'SplitCustomer',
+                    c.customer_id AS {nameof(Customer.CustomerId)},
+                    c.address_id AS {nameof(Customer.AddressId)},
+                    store_id AS {nameof(Customer.StoreId)},
+                    first_name AS {nameof(Customer.FirstName)},
+                    last_name AS {nameof(Customer.LastName)},
+                    email AS {nameof(Customer.Email)},
+                    'SplitAddress' as 'SplitAddress',
+                    a.address_id AS {nameof(Address.AddressId)},
+                    address AS {nameof(Address.Address1)}
+            FROM payment p
+                JOIN customer c ON p.customer_id = c.customer_id
+                JOIN address a ON c.address_id = a.address_id
+            ORDER BY payment_id
+                ";
+        using MySqlConnection connection = new MySqlConnection(_connectionString);
+        List<Payment> result = connection.Query<Payment, Customer, Address, Payment>(sql, (payment, customer, address) =>
+            {
+                payment.Customer = customer;
+                payment.Customer.Address = address;
+                return payment;
+            }, splitOn: "SplitCustomer, SplitAddress").ToList();
+        return result;
     }
 
     [Test]
@@ -147,7 +210,37 @@ public class Exercises3
 
     public List<Store> ExerciseOneToManyWithDictionaryMethod()
     {
-        throw new NotImplementedException();
+        using MySqlConnection connection = new MySqlConnection(_connectionString);
+        string sql = $@"
+            SELECT s.store_id AS {nameof(Store.StoreId)},
+                    manager_staff_id AS {nameof(Store.ManagerStaffId)},
+                    'SplitCustomer' as 'SplitCustomer',
+                    c.store_id AS {nameof(Customer.StoreId)},    
+                    c.customer_id AS {nameof(Customer.CustomerId)},
+                    c.address_id AS {nameof(Customer.AddressId)},                  
+                    first_name AS {nameof(Customer.FirstName)},
+                    last_name AS {nameof(Customer.LastName)},
+                    email AS {nameof(Customer.Email)}  
+            FROM store s 
+                JOIN customer c ON s.store_id = c.store_id
+            ORDER BY s.store_id, c.customer_id
+            LIMIT 10";
+
+        Dictionary<int, Store> dictionary = new Dictionary<int, Store>();
+        IEnumerable<Store> result = connection.Query<Store, Customer, Store>(sql
+            , (store, customer) =>
+            {
+                if (!dictionary.TryGetValue(store.StoreId, out Store? storeEntry))
+                {
+                    storeEntry = store;
+                    storeEntry.Customers = new List<Customer>();
+                    dictionary.Add(storeEntry.StoreId, storeEntry);
+                }
+
+                storeEntry.Customers.Add(customer);
+                return store;
+            }, splitOn: $"SplitCustomer");
+        return dictionary.Values.ToList();
     }
 
     [Test]
