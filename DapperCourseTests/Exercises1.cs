@@ -68,9 +68,7 @@ public class Exercises1
     // because it returns a strongly typed value!
     public int ExerciseScalar1()
     {
-        using MySqlConnection connection = new MySqlConnection(_connectionString);
-        int result = connection.ExecuteScalar<int>("SELECT COUNT(*) FROM movies");
-        return result;
+        throw new NotImplementedException(); //dfjknbwsejkfhbnawef
     }
     
     [Test]
