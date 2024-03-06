@@ -277,7 +277,36 @@ public class Exercises3
     //  this can be used when you views that return Json Objects and you want to merge them into one Json Object.
     private List<Store> ExerciseOneToManyWithJsonMethod()
     {
-        throw new NotImplementedException();
+        using MySqlConnection connection = new MySqlConnection(_connectionString);
+        string sql = $@"
+            SELECT JSON_OBJECT('StoreId', s.store_id,
+                   'ManagerStaffId', s.manager_staff_id,
+                   'Customers',
+                   JSON_ARRAYAGG(
+                           JSON_OBJECT('CustomerId', c.customer_id,
+                                       'FirstName', c.first_name,
+                                       'LastName', c.last_name,
+                                       'Email', c.email,
+                                       'AddressId', c.address_id,
+                                       'StoreId', c.store_id
+                                      )
+                                 )  
+                            )
+            FROM store s
+                    JOIN customer c ON s.store_id = c.store_id
+            GROUP BY s.store_id
+            ORDER BY s.store_id
+            LIMIT 10";
+
+        List<Store> result = new List<Store>();
+        IEnumerable<string> jsonResult = connection.Query<string>(sql);
+        foreach (string jsonObjStr in jsonResult)
+        {
+            Store? store = JsonSerializer.Deserialize<Store>(jsonObjStr);
+            result.Add(store);
+        }
+
+        return result;
     }
 
     [Test]
@@ -312,7 +341,35 @@ public class Exercises3
 
     public List<Film> GetFilmsIncludeActorsDictionaryMethod()
     {
-        throw new NotImplementedException();
+        string sql = """
+                         SELECT f.film_id AS FilmId, title AS Title, description AS Description,
+                                'SplitActor' as 'SplitActor',
+                                  a.actor_id AS ActorId,
+                                     first_name AS FirstName,
+                                     last_name AS LastName
+                         FROM film f JOIN film_actor fa ON f.film_id = fa.film_id
+                             JOIN actor a ON fa.actor_id = a.actor_id
+                         ORDER BY f.film_id
+                         LIMIT 5
+                     """;
+
+        using MySqlConnection connection = new MySqlConnection(ConnectionStrings.GetConnectionStringSakila());
+        Dictionary<int, Film> dictionary = new Dictionary<int, Film>();
+        IEnumerable<Film> result = connection.Query<Film, Actor, Film>(sql
+            , (film, actor) =>
+            {
+                if (!dictionary.TryGetValue(film.FilmId, out Film? filmEntry))
+                {
+                    filmEntry = film;
+                    filmEntry.Actors = new List<Actor>();
+                    dictionary.Add(filmEntry.FilmId, filmEntry);
+                }
+
+                filmEntry.Actors.Add(actor);
+                return film;
+            }, splitOn: $"SplitActor");
+        
+        return dictionary.Values.ToList();
     }
 
     [Test]
@@ -342,7 +399,28 @@ public class Exercises3
     // in other words they are both 1 to many relationships and result in a List<T> property (many side).
     public List<Film> GetFilmsIncludeActorsJsonMethod()
     {
-        throw new NotImplementedException();
+        string sql = """
+                     SELECT JSON_OBJECT('FilmId', f.film_id, 'Title', title, 'Description', description,
+                            'Actors', JSON_ARRAYAGG(JSON_OBJECT('ActorId', a.actor_id, 'FirstName', first_name, 'LastName', last_name)))
+                         
+                     FROM film f JOIN film_actor fa ON f.film_id = fa.film_id
+                                 JOIN actor a ON fa.actor_id = a.actor_id
+                     WHERE f.film_id = 1
+                     GROUP BY f.film_id
+                     ORDER BY f.film_id
+                     LIMIT 5
+                     """;
+        
+        using MySqlConnection connection = new MySqlConnection(ConnectionStrings.GetConnectionStringSakila());
+        IEnumerable<string> result = connection.Query<string>(sql);
+        List<Film> films = new List<Film>();
+        foreach (string jsonObjStr in result)
+        {
+            Film? film = JsonSerializer.Deserialize<Film>(jsonObjStr);
+            films.Add(film);
+        }
+
+        return films;
     }
     
     [Test]
