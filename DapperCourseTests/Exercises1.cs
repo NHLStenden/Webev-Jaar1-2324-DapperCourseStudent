@@ -35,24 +35,22 @@ public class Exercises1
 
     public bool Exercise0()
     {
-        using MySqlConnection connection = new MySqlConnection(_connectionString);
-        bool result = connection.QuerySingle<bool>("SELECT 1 = 1");    
-        return result;
+        throw new NotImplementedException();
     }
     
-    // [Test]
-    // public void Exercise0Test()
-    // {
-    //     // Arrange
-    //     Exercises1 sut = new Exercises1();
-    //     
-    //     // Act
-    //     bool result = sut.Exercise0();
-    //     
-    //     // Assert
-    //     result.Should().BeTrue();
-    //     // Assert.AreEqual(true, result); 
-    // }
+    [Test]
+    public void Exercise0Test()
+    {
+        // Arrange
+        Exercises1 sut = new Exercises1();
+        
+        // Act
+        bool result = sut.Exercise0();
+        
+        // Assert
+        result.Should().BeTrue();
+        // Assert.AreEqual(true, result); 
+    }
     
     // First we will start with some simple queries, that only return one single value (1 row with 1 column).
     // This is called a scalar value.
@@ -68,7 +66,7 @@ public class Exercises1
     // because it returns a strongly typed value!
     public int ExerciseScalar1()
     {
-        throw new NotImplementedException(); //dfjknbwsejkfhbnawef
+        throw new NotImplementedException();
     }
     
     [Test]
@@ -89,11 +87,7 @@ public class Exercises1
     // A method that returns a strongly typed value is always better than a method that returns a dynamic type!
     public int ExerciseScalar2()
     {
-        string sql = "Select COUNT(*) from actors WHERE Gender = 'F'";
-        using MySqlConnection connection = new MySqlConnection(_connectionString);
-        var result = connection.ExecuteScalar<int>(sql);
-        return result;
-
+        throw new NotImplementedException();
     }
 
     [Test]
@@ -115,10 +109,7 @@ public class Exercises1
     // Write a SQL query to find out.
     public bool ExerciseScalar3()
     {
-        string sql = """Select COUNT(*) from reviewers WHERE Name IS NULL OR name = "" """;
-        using MySqlConnection connection = new MySqlConnection(_connectionString);
-        bool result = connection.ExecuteScalar<bool>(sql);
-        return result;
+        throw new NotImplementedException();
     }
     
     [Test]
@@ -137,10 +128,7 @@ public class Exercises1
     // Write a SQL query to find the number of movies that have a rating higher (stars) than 8.5.
     public int ExerciseScalar4()
     {
-        string sql = "Select COUNT(*) from ratings WHERE Stars > 8.5";
-        using MySqlConnection connection = new MySqlConnection(_connectionString);
-        int result = connection.ExecuteScalar<int>(sql);
-        return result;
+        throw new NotImplementedException();
     }
     
     [Test]
@@ -160,10 +148,7 @@ public class Exercises1
     // To concatenate strings in MySql use the CONCAT function.
     public string ExerciseScalar5()
     {
-        string sql = """ SELECT CONCAT(FirstName , " " ,  LastName) FROM actors WHERE ActorId = (SELECT ActorId FROM moviecasts GROUP BY ActorId ORDER BY COUNT(*) DESC LIMIT 1) """;
-        using MySqlConnection connection = new MySqlConnection(_connectionString);
-        string result = connection.ExecuteScalar<string>(sql);
-        return result;
+        throw new NotImplementedException();
     }
     
     [Test]
@@ -183,10 +168,7 @@ public class Exercises1
     // Which movie (return title) has the highest average rating?
     public string ExerciseScalar6()
     {
-        string sql = """ SELECT Title FROM movies WHERE MovieId = (SELECT MovieId FROM ratings WHERE MovieId ORDER BY Stars DESC LIMIT 1) """;
-        using MySqlConnection connection = new MySqlConnection(_connectionString);
-        string result = connection.ExecuteScalar<string>(sql);
-        return result;
+        throw new NotImplementedException();
     }
     
     [Test]
@@ -220,10 +202,7 @@ public class Exercises1
     
     public QuerySingleResult1 ExercisesQuerySingle()
     {
-        string sql = """ SELECT FirstName, LastName FROM actors WHERE ActorId = 101 """;
-        using MySqlConnection connection = new MySqlConnection(_connectionString);
-        QuerySingleResult1 result = connection.QuerySingle<QuerySingleResult1>(sql);
-        return result;
+        throw new NotImplementedException();
     }
     
     [Test]
@@ -254,33 +233,7 @@ public class Exercises1
     
     public QuerySingleResult2 ExercisesQuerySingle2()
     {
-        //string sql = """ 
-        //            select firstname, lastname, year, duration 
-        //            from directormovie dm 
-        //            join movies m on dm.moviesmovieid = m.movieid 
-        //            join directors d on dm.directorsdirectorid = d.directorid 
-        //            where title = "american beauty" 
-        //            """;
-
-        //string sql = """ 
-        //            select firstname, lastname, year, duration 
-        //            from movies
-        //            inner join directormovie on movies.movieid = directormovie.moviesmovieid 
-        //            inner join directors on directormovie.directorsdirectorid = directors.directorid 
-        //            where title = "american beauty" 
-        //            """;
-
-        string sql = """
-                     SELECT d.FirstName, d.LastName, m.Year, m.Duration
-                     FROM Movies m
-                     INNER JOIN DirectorMovie dm ON m.MovieId = dm.MoviesMovieId
-                     INNER JOIN Directors d ON dm.DirectorsDirectorId = d.DirectorId
-                     WHERE Title = 'American Beauty'
-                     """;
-        
-        using MySqlConnection connection = new MySqlConnection(_connectionString);
-        QuerySingleResult2 result = connection.QuerySingle<QuerySingleResult2>(sql);
-        return result;
+        throw new NotImplementedException();
     }
     
     [Test]
@@ -310,12 +263,7 @@ public class Exercises1
     
     public QuerySingleResult3 ExerciseQuerySingle3()
     {
-
-        string sql = """ SELECT Title, ReleaseDate FROM movies WHERE Title = 'Does not exist' """;
-        using MySqlConnection connection = new MySqlConnection(_connectionString);
-        QuerySingleResult3 result = connection.QuerySingle<QuerySingleResult3>(sql);
-        return result;
-        //throw new ArgumentException();
+        throw new NotImplementedException();
     }
     
     [Test]
@@ -340,11 +288,7 @@ public class Exercises1
     }
     public QuerySingleOrDefaultResult1 ExerciseQuerySingleOrDefault1()
     {
-        string sql = """ SELECT Title, ReleaseDate FROM movies WHERE Title = 'Does not exist' """;
-        using MySqlConnection connection = new MySqlConnection(_connectionString);
-        QuerySingleOrDefaultResult1 result = connection.QuerySingleOrDefault<QuerySingleOrDefaultResult1>(sql);
-        return result;
-        // throw new ArgumentException();
+        throw new NotImplementedException();
     }
     
     [Test]
@@ -375,10 +319,7 @@ public class Exercises1
     
     public ExerciseQueryFirst1 ExerciseQueryFirst()
     {
-        string sql = """ SELECT Title, Language FROM movies WHERE Language = 'English' ORDER BY Title """;
-        using MySqlConnection connection = new MySqlConnection(_connectionString);
-        ExerciseQueryFirst1 result = connection.QueryFirst<ExerciseQueryFirst1>(sql);
-        return result;
+        throw new NotImplementedException();
     }
     
     [Test]
@@ -400,10 +341,7 @@ public class Exercises1
     // Don't worry about the return type, we will fix that in the next exercise.
     public IEnumerable<dynamic> ExerciseQueryDynamic()
     {
-        string sql = " SELECT Title, Year FROM movies ORDER BY Title LIMIT 10 ";
-        using MySqlConnection connection = new MySqlConnection(_connectionString);
-        IEnumerable<dynamic> result = connection.Query(sql);
-        return result;
+        throw new NotImplementedException();
     }
     
     [Test]
@@ -433,10 +371,7 @@ public class Exercises1
     
     public IEnumerable<ResultExerciseQuery> ExerciseQuery()
     { 
-        string sql = " SELECT Title, Year FROM movies ORDER BY Title LIMIT 10 ";
-        using MySqlConnection connection = new MySqlConnection(_connectionString);
-        IEnumerable<ResultExerciseQuery> result = connection.Query<ResultExerciseQuery>(sql);
-        return result;
+        throw new NotImplementedException();
     }
     
     [Test]
@@ -458,16 +393,7 @@ public class Exercises1
     // Order the result alphabetically. It's always a good idea to return a List<T> instead of IEnumerable<T> when using Dapper.
     public List<string> ExerciseQuery2()
     {
-        string sql = @"
-                    SELECT m.Title 
-                    FROM movies m 
-                    JOIN directormovie dm ON m.MovieId = dm.MoviesMovieId 
-                    JOIN directors d ON dm.DirectorsDirectorId = d.DirectorId 
-                    WHERE d.FirstName = 'Kevin' AND d.LastName = 'Spacey' 
-                    ORDER BY m.Title ";
-        using MySqlConnection connection = new MySqlConnection(_connectionString);
-        List<string> result = connection.Query<string>(sql).ToList();
-        return result;
+        throw new NotImplementedException();
     }
     
     [Test]
@@ -502,11 +428,7 @@ public class Exercises1
 
     public Movie GetMovieById(int movieId)
     {
-        string sql = "SELECT * FROM movies WHERE MovieId = @MovieId";
-        using MySqlConnection connection = new MySqlConnection(_connectionString);
-        Movie result = connection.QuerySingle<Movie>(sql, new {MovieId = movieId});
-        return result;
-        
+        throw new NotImplementedException();
     }
     
     [Test]
@@ -534,10 +456,7 @@ public class Exercises1
     // If the movie doesn't exist, return null.
     public Movie? GetMovieById2(int movieId )
     {
-        string sql = "SELECT * FROM movies WHERE MovieId = @MovieId";
-        using MySqlConnection connection = new MySqlConnection(_connectionString);
-        Movie? result = connection.QuerySingleOrDefault<Movie>(sql, new {MovieId = movieId});
-        return result;
+        throw new NotImplementedException();
     }
     
     [Test]

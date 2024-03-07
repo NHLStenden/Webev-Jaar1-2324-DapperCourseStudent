@@ -507,6 +507,4 @@ public class Examples1
         movie.ReleaseDate.Should().Be(new DateTime(1986, 8, 29));
         movie.ReleaseCountryCode.Should().Be("UK");
     }
-    
-  
 }
