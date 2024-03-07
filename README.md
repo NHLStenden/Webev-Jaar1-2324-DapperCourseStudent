@@ -1,4 +1,24 @@
-﻿# Summary of Exercises in `Exercises1.cs`
+﻿# Introduction to Dapper
+
+This project contains a series of exercises designed to practice using Dapper, a micro ORM (Object-Relational Mapping) library for .NET. The exercises are focused on connecting to a MySQL database, executing various SQL queries, and handling the results using Dapper's methods.
+You will also find several examples of how to use Dapper to execute SQL queries and handle the results.
+
+## Preqrequisites
+
+- MySQL server installed and running on your local machine
+- (optional) MySQL Workbench to visualize the database
+
+## Getting Started
+
+1. Clone the repository to your local machine using Git CLI, GitHub Desktop or your favorite IDE that supports Git.
+2. Open the project in Visual Studio or your favorite IDE.
+3. Execute the SQL scripts present in the `SQL` folder to created the necessary databases and tables and populate them with data.' The scripts are named `Create[Database]Db.sql`, `Insert[Database]Data.sql` and `CreateAndInsert[Database]Db.sql`. All SQL scripts can be executed in MySQL Workbench, exept for `InsertSakilaData.sql` which is too large to be executed in MySQL Workbench. Insert the data to the `sakila` database using the MySQL command line client by executing the following command: `SOURCE [path to the InsertSakilaData.sql file]`.
+4. `json-views.sql` is a script that creates a view in the sakila database. This view is used in the exercises in the `Exercises2.cs` file. Execute this script in MySQL Workbench to create the view.
+5. Start by checking out the examples present in the `Examples[xxx].cs` files. These files contain several examples of how to use Dapper to execute SQL queries and handle the results.
+6. When ready, move on to the exercises present in the `Exercises1.cs`, `Exercises2.cs` and `Exercises3.cs` files. Each exercise is accompanied by a unit test to verify the correctness of the implemented method.
+7. Up to and including the exercises in `Exercises2.cs` should be completed before moving on to the exercises in `Exercises3.cs`. The exercises in `Exercises3.cs` are more advanced and build on the knowledge gained from the previous exercises.
+
+# Summary of Exercises in `Exercises1.cs`
 
 The `Exercises1.cs` file contains a series of exercises designed to practice using Dapper, a micro ORM (Object-Relational Mapping) library for .NET. The exercises are focused on connecting to a MySQL database, executing various SQL queries, and handling the results using Dapper's methods.
 
