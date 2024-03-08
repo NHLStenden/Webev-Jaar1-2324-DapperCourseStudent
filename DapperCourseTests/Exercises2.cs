@@ -10,6 +10,14 @@ public class Exercises2
     // For the exercises below, use the sakila database, this database can be downloaded from:
     // https://dev.mysql.com/doc/index-other.html
     // The files are also available in the SQL folder of this project.
+    
+    // !!!!Importing this database only work with the CLI (command line interface, terminal).!!!!
+    // The database tables can be installed with the following command:
+    // mysql -u root -p sakila < DapperCourseTests/SQL/sakila-db/CreateSakilaDb.sql
+    // The password is Test@1234! (unless you chose a different one during installation)
+    // The data can be inserted with the following command:
+    // mysql -u root -p sakila < DapperCourseTests/SQL/sakila-db/InsertSakilaData.sql
+    
     // Take a look a the database schema, you can use a tool like MySQL Workbench for this (or Rider)
     // it's a movie rental database, it contains tables like:
     // actor, address, category, city, country, customer, film, film_actor, film_category, inventory, language, payment, rental, staff, store

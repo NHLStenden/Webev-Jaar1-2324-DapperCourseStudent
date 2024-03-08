@@ -12,13 +12,13 @@ public class Examples1
         ConnectionString = ConnectionStrings.GetConnectionStringMovies();
     }
     
-    
-    // Create the movies database and tables using the createMovies.sql in the SQL folder.
-    // Load the data into the database, by executing the insertMovies.sql script in the SQL folder.
-    // This is aa exercises to make sure that you can connect to the database.
-    // You can use the NuGet Package Manager or the Package Manager Console to install MySql.Data. (Database provider for mysql, sometimes called connector or driver)
+    // Create the movies database and tables using the movies-db/CreateMoviesDb.sql in the SQL folder.
+    // Load the data into the database, by executing the movies-db/InsertMovies.sql script in the SQL folder.
+    // This is an Example to make sure that you can connect to the database.
+    // The Dapper package is already installed in the project. Otherwise you can install it using the NuGet Package Manager or the Package Manager Console.
+    // You can use the NuGet Package Manager or the Package Manager Console to install MySqlConnector (Database provider for mysql, sometimes called connector or driver)
     // https://www.learndapper.com/database-providers (go to MySql section)
-    // In the Package Manager Console, type: Install-Package MySql.Data
+    // In the Package Manager Console, type: Install-Package MySqlConnector
     // If you are using Rider, you can use the NuGet tool window.
     // If you are using Visual Studio, you can use the NuGet Package Manager.
     // You can find the connection string for mysql here: https://www.connectionstrings.com/mysql/ .

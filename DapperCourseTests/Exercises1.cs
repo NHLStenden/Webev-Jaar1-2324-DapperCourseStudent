@@ -6,9 +6,8 @@ namespace DapperCourseTests;
 
 public class Exercises1
 {
-    // Create the movies database and tables using the createMovies.sql in the SQL folder.
-    // Load the data into the database, by executing the insertMovies.sql script in the SQL folder.
-    // This is an exercises to make sure that you can connect to the database.
+    // Create the movies database and tables using the CreateMoviesDb.sql in the SQL/movies-db folder.
+    // Load the data into the database, by executing the InsertMoviesData.sql script in the SQL/movies-db folder.
    
     // You can find the connection string for mysql here: https://www.connectionstrings.com/mysql/ .
     // Make a database connection to the Movies database. The password that I always use for development is Test@1234!
@@ -27,15 +26,25 @@ public class Exercises1
     // Rider can help you with this!!! If you type the name of a table or column, it will show you the correct case.
     // Rider can inspect the database schema (structure of database, such as tables, columns, views, etc.)
     // and assist you with writing correct SQL and also the case sensitivity of the table and column names.
-    private readonly string _connectionString;
-    public Exercises1() 
+    
+    // The first "exercise" is to test if you can connect to the database.
+    // Just try to execute the Test method (Exercise0Test) and see if it passes.
+    // If it passes, you can connect to the database :-).  If it fails :-(, you have to check the connection string.
+    // Of course, the database must be running.
+    // Other problems can also occur, try to solve them by yourself or ask for help
+    // (the error message in combination with Google (stackoverflow.com) is your friend).
+    
+    private string GetConnectionString()
     {
-        _connectionString = ConnectionStrings.GetConnectionStringMovies();
+        return "server=localhost;port=3306;database=Movies;user=root;password=Test@1234!";
     }
-
+    
     public bool Exercise0()
     {
-        throw new NotImplementedException();
+        using MySqlConnection connection = new MySqlConnection(GetConnectionString());
+        connection.Open();
+        bool result = connection.QuerySingle<bool>("SELECT 1 = 1");
+        return result;
     }
     
     [Test]
@@ -64,6 +73,8 @@ public class Exercises1
     // We know that the query will always returns a value, so we can cast it to the correct type (Convert.ToInt32(...)).
     // In the next exercise we will use the ExecuteScalar<T>() method, this is a better method,
     // because it returns a strongly typed value!
+    
+    // If you don't know what to do, take a look at the Examples1.cs file, maybe you can find some help there. 
     public int ExerciseScalar1()
     {
         throw new NotImplementedException();
