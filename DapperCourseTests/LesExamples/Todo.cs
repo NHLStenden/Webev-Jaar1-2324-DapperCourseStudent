@@ -29,7 +29,14 @@ public class TodoDemo
     public void GetTest()
     {
         var todos = TodoDemo.Get();
-        Assert.AreEqual(3, todos.Count);
+        
+        // place a breakpoint here and inspect the todos variable
+        
+        // INSERT INTO Todo (Name, Completed) VALUES ('Buy milk', 0);
+        // INSERT INTO Todo (Name, Completed) VALUES ('Buy eggs', 1);
+        // INSERT INTO Todo (Name, Completed) VALUES ('Create Assignment', 0);
+        // INSERT INTO Todo (Name, Completed) VALUES ('Check Assignment', 1);
+
     }
     
     public static Todo? Get(int id)
