@@ -21,8 +21,8 @@ public static class ConnectionStrings
     {
         return "server=localhost;port=3306;database=Books;user=root;password=Test@1234!";
     }
-    
-    private static string GetConnectionStringTodo()
+
+    public static string GetConnectionStringTodo()
     {
         return "Server=localhost;Database=Todo;Uid=root;Pwd=Test@1234!;";
     }

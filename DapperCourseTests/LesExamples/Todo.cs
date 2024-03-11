@@ -6,7 +6,7 @@ namespace DapperCourseTests.LesExamples;
 public class Todo
 {
     public int Id { get; set; }
-    public string Title { get; set; } = null!;
+    public string Name { get; set; } = null!;
     public bool Completed { get; set; } = false;
 }
 
@@ -15,7 +15,7 @@ public class TodoDemo
     private static readonly string ConnectionString;
     static TodoDemo()
     {
-        ConnectionString = ConnectionStrings.GetConnectionStringMovies();
+        ConnectionString = ConnectionStrings.GetConnectionStringTodo();
     }
     
     public static List<Todo> Get()
@@ -23,6 +23,13 @@ public class TodoDemo
         using var connection = new MySqlConnection(ConnectionString);
         return connection.Query<Todo>("SELECT Id, Name, Completed FROM Todo")
                         .ToList();
+    }
+    
+    [Test]
+    public void GetTest()
+    {
+        var todos = TodoDemo.Get();
+        Assert.AreEqual(3, todos.Count);
     }
     
     public static Todo? Get(int id)
